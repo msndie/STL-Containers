@@ -8,18 +8,18 @@ namespace ft {
 	template< class T, class A = std::allocator<T> >
 	class vector {
 	public:
-		typedef T	value_type;
-		typedef A 	allocator_type;
-		typedef std::size_t	size_type;
-		typedef value_type&	reference;
+		typedef T					value_type;
+		typedef A 					allocator_type;
+		typedef std::size_t			size_type;
+		typedef value_type&			reference;
 		typedef const value_type&	const_reference;
-		typedef T*	pointer;
-		typedef const T*	const_pointer;
+		typedef T*					pointer;
+		typedef const T*			const_pointer;
 
 	private:
-		T*	_array;
-		size_type	_size;
-		size_type	_capacity;
+		T*				_array;
+		size_type		_size;
+		size_type		_capacity;
 		allocator_type	_allocator;
 
 	public:
@@ -49,6 +49,22 @@ namespace ft {
 		~vector() {
 			clear();
 			_allocator.deallocate(_array, _capacity);
+		}
+
+		vector& operator=( const vector& other ) {
+			if (&other != this) {
+				if (std::allocator_traits<allocator_type>::propagate_on_container_copy_assignment::value) {
+					if (_allocator != other._allocator) {
+						clear();
+						_allocator.deallocate(_array, _capacity);
+						_capacity = 0;
+						_array = nullptr;
+					}
+					_allocator = other._allocator;
+				}
+//				assign();
+			}
+			return *this;
 		}
 
 		const_reference operator[](size_type pos) {
