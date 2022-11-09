@@ -2,6 +2,7 @@
 #define VECTOR_HPP
 
 #include <memory>
+#include "Iterator.hpp"
 
 namespace ft {
 
@@ -75,6 +76,10 @@ namespace ft {
 			return _array[pos];
 		}
 
+		allocator_type get_allocator() const {
+			return _allocator;
+		}
+
 		reference at(size_type pos) {
 			if (pos >= _size) throw std::out_of_range("Vector");
 			return _array[pos];
@@ -83,6 +88,39 @@ namespace ft {
 		const_reference at(size_type pos) const {
 			if (pos >= _size) throw std::out_of_range("Vector");
 			return _array[pos];
+		}
+
+		reference front() {
+			return _array[0];
+		}
+
+		const_reference front() const {
+			return _array[0];
+		}
+
+		reference back() {
+			return _array[_size - 1];
+		}
+
+		const_reference back() const {
+			return _array[_size - 1];
+		}
+
+		pointer data() {
+			return _array;
+		}
+
+		const_pointer data() const {
+			return _array;
+		}
+
+		bool empty() const {
+			return _size == 0;
+		}
+
+		size_type max_size() const {
+			return std::min(static_cast<size_type>(std::numeric_limits<typename A::difference_type>::max()),
+							_allocator.max_size());
 		}
 
 		size_type size() const {
