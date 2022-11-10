@@ -14,20 +14,22 @@ namespace ft {
 		typedef typename Iter::difference_type		difference_type;
 		typedef typename Iter::pointer				pointer;
 		typedef typename Iter::reference			reference;
-		typedef typename Iter::itarator_category	iterator_category;
+		typedef typename Iter::iterator_category	iterator_category;
 	};
 
 	template<typename T>
 	struct iterator_traits<T*> {
 	public:
-		typedef T									value_type;
-		typedef T*									pointer;
-		typedef T&									reference;
-		typedef ptrdiff_t							difference_type;
-		typedef std::random_access_iterator_tag		iterator_category;
+		typedef T								value_type;
+		typedef T*								pointer;
+		typedef T&								reference;
+		typedef ptrdiff_t						difference_type;
+		typedef std::random_access_iterator_tag	iterator_category;
 	};
 
-	template<class T> struct iterator_traits<const T*> {
+	template<typename T>
+	struct iterator_traits<const T*> {
+	public:
 		typedef ptrdiff_t						difference_type;
 		typedef T								value_type;
 		typedef const T*						pointer;
@@ -40,12 +42,16 @@ namespace ft {
 	private:
 		T	_value;
 	public:
-		typedef T												iterator_type;
-		typedef typename iterator_traits<T>::difference_type	difference_type;
-		typedef typename iterator_traits<T>::reference			reference;
-		typedef typename iterator_traits<T>::pointer			pointer;
+		typedef T															iterator_type;
+		typedef typename iterator_traits<iterator_type>::value_type			value_type;
+		typedef typename iterator_traits<iterator_type>::difference_type	difference_type;
+		typedef typename iterator_traits<iterator_type>::reference			reference;
+		typedef typename iterator_traits<iterator_type>::pointer			pointer;
+		typedef typename iterator_traits<iterator_type>::iterator_category	iterator_category;
 
-		iterator(iterator_type value = nullptr) : _value(value) {}
+		iterator() : _value() {}
+
+		iterator(iterator_type value) : _value(value) {}
 
 		template< class U >
 		iterator(const iterator<U>& other)
@@ -86,14 +92,16 @@ namespace ft {
 	private:
 		T _value;
 	public:
-		typedef T												iterator_type;
-		typedef typename iterator_traits<T>::difference_type	difference_type;
-		typedef typename iterator_traits<T>::reference			reference;
-		typedef typename iterator_traits<T>::pointer			pointer;
+		typedef T															iterator_type;
+		typedef typename iterator_traits<iterator_type>::value_type			value_type;
+		typedef typename iterator_traits<iterator_type>::difference_type	difference_type;
+		typedef typename iterator_traits<iterator_type>::reference			reference;
+		typedef typename iterator_traits<iterator_type>::pointer			pointer;
+		typedef typename iterator_traits<iterator_type>::iterator_category	iterator_category;
 
 		reverse_iterator() : _value() {}
 
-		explicit reverse_iterator(iterator_type x) : _value(x) {}
+		reverse_iterator(iterator_type x) : _value(x) {}
 
 		template<class U>
 		reverse_iterator(const reverse_iterator<U>& u) : _value(u.base()) {}
@@ -221,7 +229,7 @@ namespace ft {
 
 	template <class Iter1, class Iter2>
 	typename iterator<Iter1>::difference_type operator-(const iterator<Iter1>& x, const iterator<Iter2>& y) {
-		x.base() - y.base();
+		return x.base() - y.base();
 	}
 
 	template <class Iter>
