@@ -34,12 +34,62 @@ namespace ft {
 			}
 		}
 
+		template <class InputIter>
+		typename ft::enable_if<!ft::is_integral<InputIter>::value, void>::type
+		construct_at_end(InputIter first, InputIter last) {
+			while (first != last) {
+				_allocator.construct(&_array[_size++], *first++);
+			}
+		}
+
 		void destruct_at_end(pointer new_end) {
 			pointer old_end = &_array[_size];
 			while (new_end != old_end) {
 				_allocator.destroy(--old_end);
 				--_size;
 			}
+		}
+
+		iterator insert_helper(const_iterator pos, size_type count, const_reference value, bool fill) {
+			pointer p = _array + (pos - begin());
+
+			if (count == 0) return iterator(p);
+			if (_size + count - 1 < _capacity) {
+				if (p == &_array[_size]) {
+					construct_at_end(count, value);
+				} else {
+					std::memmove(p + count, p, (&_array[_size] - p) * sizeof(value_type));
+					pointer tmp = p;
+					for (size_type i = 0; i < count; ++i, ++tmp) {
+						_allocator.construct(tmp, value);
+						++_size;
+					}
+				}
+			} else {
+				size_type tmp_capacity = _capacity;
+				if (fill) {
+					_capacity += count;
+				} else {
+					while (_capacity < _size + count)
+						_capacity = _capacity ? _capacity * 2 : 1;
+				}
+				pointer tmp = _allocator.allocate(_capacity);
+				pointer tmp_pointer = p;
+				for (size_type i = 0, j = 0; j < _size + count; ++j) {
+					if (&_array[i] == tmp_pointer && j - i < count) {
+						_allocator.construct(&tmp[j], value);
+						if (tmp_pointer == p) p = &tmp[j];
+						continue;
+					} else {
+						_allocator.construct(&tmp[j], _array[i]);
+						_allocator.destroy(&_array[i++]);
+					}
+				}
+				if (_array) _allocator.deallocate(_array, tmp_capacity);
+				_array = tmp;
+				_size += count;
+			}
+			return iterator(p);
 		}
 
 	public:
@@ -89,16 +139,29 @@ namespace ft {
 			return *this;
 		}
 
-		const_reference operator[](size_type pos) {
-			return _array[pos];
-		}
-
-		reference operator[](size_type pos) const {
-			return _array[pos];
-		}
-
-		allocator_type get_allocator() const {
-			return _allocator;
+		const_reference operator[](size_type pos) { return _array[pos]; }
+		reference operator[](size_type pos) const { return _array[pos]; }
+		allocator_type get_allocator() const { return _allocator; }
+		reference front() { return _array[0]; }
+		const_reference front() const { return _array[0]; }
+		reference back() { return _array[_size - 1]; }
+		const_reference back() const { return _array[_size - 1]; }
+		pointer data() { return _array; }
+		const_pointer data() const { return _array; }
+		bool empty() const { return _size == 0; }
+		size_type size() const { return _size; }
+		size_type capacity() { return _capacity; }
+		iterator begin() { return iterator(_array); }
+		const_iterator begin() const { return const_iterator(_array); }
+		iterator end() { return iterator(&_array[_size]); }
+		const_iterator end() const { return const_iterator(&_array[_size]); }
+		reverse_iterator rbegin() { return reverse_iterator(end()); }
+		const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+		reverse_iterator rend() { return reverse_iterator(begin()); }
+		const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+		size_type max_size() const {
+			return std::min(static_cast<size_type>(std::numeric_limits<typename A::difference_type>::max()),
+							_allocator.max_size());
 		}
 
 		reference at(size_type pos) {
@@ -109,79 +172,6 @@ namespace ft {
 		const_reference at(size_type pos) const {
 			if (pos >= _size) throw std::out_of_range("vector");
 			return _array[pos];
-		}
-
-		reference front() {
-			return _array[0];
-		}
-
-		const_reference front() const {
-			return _array[0];
-		}
-
-		reference back() {
-			return _array[_size - 1];
-		}
-
-		const_reference back() const {
-			return _array[_size - 1];
-		}
-
-		pointer data() {
-			return _array;
-		}
-
-		const_pointer data() const {
-			return _array;
-		}
-
-		bool empty() const {
-			return _size == 0;
-		}
-
-		size_type max_size() const {
-			return std::min(static_cast<size_type>(std::numeric_limits<typename A::difference_type>::max()),
-							_allocator.max_size());
-		}
-
-		size_type size() const {
-			return _size;
-		}
-
-		size_type capacity() {
-			return _capacity;
-		}
-
-		iterator begin() {
-			return iterator(_array);
-		}
-
-		const_iterator begin() const {
-			return const_iterator(_array);
-		}
-
-		iterator end() {
-			return iterator(&_array[_size]);
-		}
-
-		const_iterator end() const {
-			return const_iterator(&_array[_size]);
-		}
-
-		reverse_iterator rbegin() {
-			return reverse_iterator(end());
-		}
-
-		const_reverse_iterator rbegin() const {
-			return const_reverse_iterator(end());
-		}
-
-		reverse_iterator rend() {
-			return reverse_iterator(begin());
-		}
-
-		const_reverse_iterator rend() const {
-			return const_reverse_iterator(begin());
 		}
 
 		void assign(size_type count, const_reference value) {
@@ -225,78 +215,79 @@ namespace ft {
 		}
 
 		iterator insert(const_iterator pos, const_reference value) {
-			pointer p = _array + (pos - begin());
-			if (&_array[_size] < &_array[_capacity]) {
-				if (p == &_array[_size]) {
-					_allocator.construct(&_array[_size++], value);
-				} else {
-					std::memmove(p + 1, p, (&_array[_size] - p) * sizeof(value_type));
-					*p = value;
-					++_size;
-				}
-			} else {
-				pointer tmp = _allocator.allocate(_capacity * 2);
-				size_type i = 0, j = 0;
-				while (j < _size + 1) {
-					if (&_array[i] == p) {
-						_allocator.construct(&tmp[i], value);
-						p = &tmp[i];
-						++j;
-						continue;
-					} else {
-						tmp[j++] = _array[i++];
-					}
-				}
-				_allocator.deallocate(_array, _capacity);
-				_capacity *= 2;
-				_array = tmp;
-				++_size;
-			}
-			return iterator(p);
+//			pointer p = _array + (pos - begin());
+//			if (_size < _capacity) {
+//				if (p == &_array[_size]) {
+//					_allocator.construct(&_array[_size++], value);
+//				} else {
+//					std::memmove(p + 1, p, (&_array[_size] - p) * sizeof(value_type));
+//					_allocator.construct(p, value);
+//					++_size;
+//				}
+//			} else {
+//				pointer tmp = _allocator.allocate(_capacity ? _capacity * 2 : 1);
+//				for (size_type i = 0, j = 0; j < _size + 1;) {
+//					if (&_array[i] == p) {
+//						_allocator.construct(&tmp[i], value);
+//						p = &tmp[i];
+//						++j;
+//						continue;
+//					} else {
+//						tmp[j++] = _array[i++];
+//					}
+//				}
+//				if (_array) _allocator.deallocate(_array, _capacity);
+//				_capacity = _capacity ? _capacity * 2 : 1;
+//				_array = tmp;
+//				++_size;
+//			}
+//			return iterator(p);
+			return insert_helper(pos, 1, value, false);
 		}
 
 		iterator insert(const_iterator pos, size_type count, const_reference value) {
-			if (count == 0) return pos;
+			return insert_helper(pos, count, value, true);
+		}
+
+		template<class InputIt>
+		iterator insert(const_iterator pos, InputIt first, InputIt last,
+						typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = nullptr) {
+			size_type dist = std::distance(first, last);
 			pointer p = _array + (pos - begin());
-			if (&_array[_size + count - 1] < &_array[_capacity]) {
+
+			if (first == last) return iterator(p);
+			if (_size + dist - 1 < _capacity) {
 				if (p == &_array[_size]) {
-					for (size_type i = 0; i < count; ++i) {
-						_allocator.construct(&_array[_size++], value);
-					}
+					construct_at_end(first, last);
 				} else {
-					std::memmove(p + count, p, (&_array[_size] - p) * sizeof(value_type));
-					for (size_type i = 0; i < count; ++i, ++p) {
-						*p = value;
-						++_size;
+					std::memmove(p + dist, p, (&_array[_size] - p) * sizeof(value_type));
+					pointer tmp = p;
+					for (; first != last; ++first, ++tmp, ++_size) {
+						_allocator.construct(tmp, *first);
 					}
 				}
 			} else {
 				size_type tmp_capacity = _capacity;
-				while (_capacity < _size + count)
-					_capacity *= 2;
+				while (_capacity < _size + dist)
+					_capacity = _capacity ? _capacity * 2 : 1;
 				pointer tmp = _allocator.allocate(_capacity);
-				size_type i = 0, j = 0;
 				pointer tmp_pointer = p;
-				while (j < _size + count) {
-					if (&_array[i] == tmp_pointer && j - i < count) {
-						_allocator.construct(&tmp[j], value);
+
+				for (size_type i = 0, j = 0; j < _size + dist; ++j) {
+					if (&_array[i] == tmp_pointer && j - i < dist) {
+						_allocator.construct(&tmp[j], *first++);
 						if (tmp_pointer == p) p = &tmp[j];
-						++j;
 						continue;
 					} else {
-						tmp[j++] = _array[i++];
+						_allocator.construct(&tmp[j], _array[i]);
+						_allocator.destroy(&_array[i++]);
 					}
 				}
-				_allocator.deallocate(_array, tmp_capacity);
+				if (_array) _allocator.deallocate(_array, tmp_capacity);
 				_array = tmp;
-				_size += count;
+				_size += dist;
 			}
 			return iterator(p);
-		}
-
-		template<class InputIt>
-		iterator insert(const_iterator pos, InputIt first, InputIt last) {
-
 		}
 
 		void clear() {
@@ -309,7 +300,11 @@ namespace ft {
 		void reserve(size_type new_cap) {
 			if (new_cap > _capacity) {
 				pointer tmp = _allocator.allocate(new_cap);
-				std::memcpy(tmp, _array, sizeof(T) * _size);
+				for (size_type i = 0; i < _size; ++i) {
+					_allocator.construct(&tmp[i], _array[i]);
+					_allocator.destroy(&_array[i]);
+				}
+//				std::memcpy(tmp, _array, sizeof(T) * _size);
 				if (_array) {
 					_allocator.deallocate(_array, _capacity);
 				}
@@ -322,7 +317,8 @@ namespace ft {
 			if (_size == _capacity) {
 				!_capacity ? reserve(1) : reserve(_capacity * 2);
 			}
-			_array[_size++] = value;
+			construct_at_end(1, value);
+//			_array[_size++] = value;
 		}
 	};
 }
