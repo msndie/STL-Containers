@@ -130,10 +130,46 @@ std::vector<int> test4(ft::vector<T> vector = ft::vector<T>()) {
 	return v;
 }
 
+template <typename T>
+std::vector<int> test5(std::vector<T> vector = std::vector<T>()) {
+	std::vector<int> v;
+	vector.assign(9900 * 10000, 1);
+	vector.resize(5000 * 10000);
+	vector.reserve(5000 * 10000);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	vector.resize(7000 * 10000);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	vector.resize(15300 * 10000, T());
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	v.push_back(vector[65]);
+	return v;
+}
+
+template <typename T>
+std::vector<int> test6(ft::vector<T> vector = ft::vector<T>()) {
+	std::vector<int> v;
+	vector.assign(9900 * 10000, 1);
+	vector.resize(5000 * 10000);
+	vector.reserve(5000 * 10000);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	vector.resize(7000 * 10000);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	vector.resize(15300 * 10000, T());
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	v.push_back(vector[65]);
+	return v;
+}
+
 int main() {
-	std::vector<int> v1 = test3<int>();
+	std::vector<int> v1 = test5<int>();
 	std::cout << "--------------------" << std::endl;
-	std::vector<int> v2 = test4<int>();
+	std::vector<int> v2 = test6<int>();
 
 	std::cout << (v1 == v2) << std::endl;
 }

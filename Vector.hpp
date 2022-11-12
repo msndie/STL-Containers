@@ -236,11 +236,26 @@ namespace ft {
 					_allocator.construct(&tmp[i], _array[i]);
 					_allocator.destroy(&_array[i]);
 				}
-				if (_array) {
-					_allocator.deallocate(_array, _capacity);
-				}
+				if (_array) _allocator.deallocate(_array, _capacity);
 				_capacity = new_cap;
 				_array = tmp;
+			}
+		}
+
+		void resize(size_type count, T value = T()) {
+			size_type diff = count - _size;
+
+			if (_size < count) {
+				if (_capacity - _size < diff) {
+					size_type new_cap = _capacity;
+					if (new_cap >= max_size() / 2) {
+						new_cap = max_size();
+					}
+					reserve(std::max(2 * new_cap, _size + diff));
+				}
+				construct_at_end(count - _size, value);
+			} else if (_size > count) {
+				destruct_at_end(_array + count);
 			}
 		}
 
@@ -249,6 +264,10 @@ namespace ft {
 				!_capacity ? reserve(1) : reserve(_capacity * 2);
 			}
 			construct_at_end(1, value);
+		}
+
+		void pop_back() {
+			destruct_at_end(&_array[_size - 1]);
 		}
 
 	private:
