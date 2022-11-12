@@ -166,10 +166,74 @@ std::vector<int> test6(ft::vector<T> vector = ft::vector<T>()) {
 	return v;
 }
 
+template <typename T>
+std::vector<int> test7(std::vector<T> vector = std::vector<T>()) {
+	std::vector<int> v;
+	int _ratio = 10000;
+	vector.assign(1100 * _ratio, 11);
+	std::vector<int> tmp(500 * _ratio, 5), tmp2(1000 * _ratio, 10), tmp3(1500 * _ratio, 15), tmp4(3000 * _ratio, 30);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	long *adr1 = reinterpret_cast<long *>(&vector);
+	long *adr2 = reinterpret_cast<long *>(&tmp);
+	vector.swap(tmp);
+	if (reinterpret_cast<long *>(&vector) == adr1 && reinterpret_cast<long *>(&tmp) == adr2)
+		v.push_back(1);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	vector.swap(tmp3);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	std::swap(vector, tmp2);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	std::swap(vector, tmp4);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	return v;
+}
+
+template <typename T>
+std::vector<int> test8(ft::vector<T> vector = ft::vector<T>()) {
+	std::vector<int> v;
+	int _ratio = 10000;
+	vector.assign(1100 * _ratio, 11);
+	ft::vector<int> tmp(500 * _ratio, 5), tmp2(1000 * _ratio, 10), tmp3(1500 * _ratio, 15), tmp4(3000 * _ratio, 30);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	long *adr1 = reinterpret_cast<long *>(&vector);
+	long *adr2 = reinterpret_cast<long *>(&tmp);
+	vector.swap(tmp);
+	if (reinterpret_cast<long *>(&vector) == adr1 && reinterpret_cast<long *>(&tmp) == adr2)
+		v.push_back(1);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	vector.swap(tmp3);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	std::swap(vector, tmp2);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	std::swap(vector, tmp4);
+	v.push_back(vector[2]);
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	return v;
+}
+
 int main() {
-	std::vector<int> v1 = test5<int>();
-	std::cout << "--------------------" << std::endl;
-	std::vector<int> v2 = test6<int>();
+	std::vector<int> v1 = test7<int>();
+	std::cout << "1--------------------1" << std::endl;
+	std::vector<int> v2 = test8<int>();
 
 	std::cout << (v1 == v2) << std::endl;
 }

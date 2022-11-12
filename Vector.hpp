@@ -270,6 +270,13 @@ namespace ft {
 			destruct_at_end(&_array[_size - 1]);
 		}
 
+		void swap(vector& other) {
+			std::swap(_array, other._array);
+			std::swap(_size, other._size);
+			std::swap(_capacity, other._capacity);
+			std::swap(_allocator, other._allocator);
+		}
+
 	private:
 
 		void move_part_of_array(pointer from, pointer to, size_t len) {
@@ -364,6 +371,13 @@ namespace ft {
 			_allocator.deallocate(buffer, range);
 		}
 	};
+}
+
+namespace std {
+	template< class T, class A >
+	void swap(ft::vector<T, A>& x, ft::vector<T,A>& y) {
+		x.swap(y);
+	}
 }
 
 #endif /*VECTOR_HPP*/
