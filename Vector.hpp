@@ -28,70 +28,6 @@ namespace ft {
 		size_type		_capacity;
 		allocator_type	_allocator;
 
-		void construct_at_end(size_type n, const_reference v) {
-			for (size_type j = 0; j < n; ++j, ++_size) {
-				_allocator.construct(&_array[_size], v);
-			}
-		}
-
-		template <class InputIter>
-		typename ft::enable_if<!ft::is_integral<InputIter>::value, void>::type
-		construct_at_end(InputIter first, InputIter last) {
-			while (first != last) {
-				_allocator.construct(&_array[_size++], *first++);
-			}
-		}
-
-		void destruct_at_end(pointer new_end) {
-			pointer old_end = &_array[_size];
-			while (new_end != old_end) {
-				_allocator.destroy(--old_end);
-				--_size;
-			}
-		}
-
-		iterator insert_helper(const_iterator pos, size_type count, const_reference value, bool fill) {
-			pointer p = _array + (pos - begin());
-
-			if (count == 0) return iterator(p);
-			if (_size + count - 1 < _capacity) {
-				if (p == &_array[_size]) {
-					construct_at_end(count, value);
-				} else {
-					std::memmove(p + count, p, (&_array[_size] - p) * sizeof(value_type));
-					pointer tmp = p;
-					for (size_type i = 0; i < count; ++i, ++tmp) {
-						_allocator.construct(tmp, value);
-						++_size;
-					}
-				}
-			} else {
-				size_type tmp_capacity = _capacity;
-				if (fill) {
-					_capacity += count;
-				} else {
-					while (_capacity < _size + count)
-						_capacity = _capacity ? _capacity * 2 : 1;
-				}
-				pointer tmp = _allocator.allocate(_capacity);
-				pointer tmp_pointer = p;
-				for (size_type i = 0, j = 0; j < _size + count; ++j) {
-					if (&_array[i] == tmp_pointer && j - i < count) {
-						_allocator.construct(&tmp[j], value);
-						if (tmp_pointer == p) p = &tmp[j];
-						continue;
-					} else {
-						_allocator.construct(&tmp[j], _array[i]);
-						_allocator.destroy(&_array[i++]);
-					}
-				}
-				if (_array) _allocator.deallocate(_array, tmp_capacity);
-				_array = tmp;
-				_size += count;
-			}
-			return iterator(p);
-		}
-
 	public:
 
 		explicit vector(const A& alloc = A()) : _array(nullptr), _allocator(alloc), _size(0), _capacity(0) {}
@@ -215,33 +151,6 @@ namespace ft {
 		}
 
 		iterator insert(const_iterator pos, const_reference value) {
-//			pointer p = _array + (pos - begin());
-//			if (_size < _capacity) {
-//				if (p == &_array[_size]) {
-//					_allocator.construct(&_array[_size++], value);
-//				} else {
-//					std::memmove(p + 1, p, (&_array[_size] - p) * sizeof(value_type));
-//					_allocator.construct(p, value);
-//					++_size;
-//				}
-//			} else {
-//				pointer tmp = _allocator.allocate(_capacity ? _capacity * 2 : 1);
-//				for (size_type i = 0, j = 0; j < _size + 1;) {
-//					if (&_array[i] == p) {
-//						_allocator.construct(&tmp[i], value);
-//						p = &tmp[i];
-//						++j;
-//						continue;
-//					} else {
-//						tmp[j++] = _array[i++];
-//					}
-//				}
-//				if (_array) _allocator.deallocate(_array, _capacity);
-//				_capacity = _capacity ? _capacity * 2 : 1;
-//				_array = tmp;
-//				++_size;
-//			}
-//			return iterator(p);
 			return insert_helper(pos, 1, value, false);
 		}
 
@@ -256,11 +165,13 @@ namespace ft {
 			pointer p = _array + (pos - begin());
 
 			if (first == last) return iterator(p);
+			validate_iterator_values(first, last, dist);
 			if (_size + dist - 1 < _capacity) {
 				if (p == &_array[_size]) {
 					construct_at_end(first, last);
 				} else {
-					std::memmove(p + dist, p, (&_array[_size] - p) * sizeof(value_type));
+					std::memmove(static_cast<void *>(p + dist), static_cast<void *>(p),
+								 (&_array[_size] - p) * sizeof(value_type));
 					pointer tmp = p;
 					for (; first != last; ++first, ++tmp, ++_size) {
 						_allocator.construct(tmp, *first);
@@ -291,9 +202,7 @@ namespace ft {
 		}
 
 		void clear() {
-			for (size_type i = 0; i < _size; ++i) {
-				_allocator.destroy(&_array[i]);
-			}
+			destruct_all(_array, _size);
 			_size = 0;
 		}
 
@@ -304,7 +213,6 @@ namespace ft {
 					_allocator.construct(&tmp[i], _array[i]);
 					_allocator.destroy(&_array[i]);
 				}
-//				std::memcpy(tmp, _array, sizeof(T) * _size);
 				if (_array) {
 					_allocator.deallocate(_array, _capacity);
 				}
@@ -318,7 +226,96 @@ namespace ft {
 				!_capacity ? reserve(1) : reserve(_capacity * 2);
 			}
 			construct_at_end(1, value);
-//			_array[_size++] = value;
+		}
+
+	private:
+
+		void construct_at_end(size_type n, const_reference v) {
+			for (size_type j = 0; j < n; ++j, ++_size) {
+				_allocator.construct(&_array[_size], v);
+			}
+		}
+
+		template <class InputIter>
+		typename ft::enable_if<!ft::is_integral<InputIter>::value, void>::type
+		construct_at_end(InputIter first, InputIter last) {
+			while (first != last) {
+				_allocator.construct(&_array[_size++], *first++);
+			}
+		}
+
+		void destruct_at_end(pointer new_end) {
+			pointer old_end = &_array[_size];
+			while (new_end != old_end) {
+				_allocator.destroy(--old_end);
+				--_size;
+			}
+		}
+
+		iterator insert_helper(const_iterator pos, size_type count, const_reference value, bool fill) {
+			pointer p = _array + (pos - begin());
+
+			if (count == 0) return iterator(p);
+			if (_size + count - 1 < _capacity) {
+				if (p == &_array[_size]) {
+					construct_at_end(count, value);
+				} else {
+					std::memmove(p + count, p, (&_array[_size] - p) * sizeof(value_type));
+					pointer tmp = p;
+					for (size_type i = 0; i < count; ++i, ++tmp) {
+						_allocator.construct(tmp, value);
+						++_size;
+					}
+				}
+			} else {
+				size_type tmp_capacity = _capacity;
+				if (fill) {
+					_capacity += count;
+				} else {
+					while (_capacity < _size + count)
+						_capacity = _capacity ? _capacity * 2 : 1;
+				}
+				pointer tmp = _allocator.allocate(_capacity);
+				pointer tmp_pointer = p;
+				for (size_type i = 0, j = 0; j < _size + count; ++j) {
+					if (&_array[i] == tmp_pointer && j - i < count) {
+						_allocator.construct(&tmp[j], value);
+						if (tmp_pointer == p) p = &tmp[j];
+						continue;
+					} else {
+						_allocator.construct(&tmp[j], _array[i]);
+						_allocator.destroy(&_array[i++]);
+					}
+				}
+				if (_array) _allocator.deallocate(_array, tmp_capacity);
+				_array = tmp;
+				_size += count;
+			}
+			return iterator(p);
+		}
+
+		void destruct_all(pointer where, size_type how_many) {
+			for (size_type i = 0; i < how_many; ++i) {
+				_allocator.destroy(&where[i]);
+			}
+		}
+
+		template<class InputIt>
+		void validate_iterator_values(InputIt first, InputIt last, size_t range,
+									  typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = nullptr) {
+			pointer buffer = _allocator.allocate(range);
+
+			for (size_type i = 0; first != last; ++first, ++i) {
+				try {
+					_allocator.construct(&buffer[i], *first);
+				} catch (...) {
+					destruct_all(buffer, i);
+					_allocator.deallocate(buffer, range);
+					throw;
+				}
+			}
+			destruct_all(buffer, range);
+			_allocator.deallocate(buffer, range);
 		}
 	};
 }

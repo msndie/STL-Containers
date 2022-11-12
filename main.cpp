@@ -6,12 +6,16 @@ class B {
 public:
 	char *l;
 	int i;
-	B():l(nullptr), i(1) {};
+	B():l(nullptr), i(1) {
+		std::cout << "constructor B" << std::endl;
+	};
 	B(const int &ex) {
 		this->i = ex;
 		this->l = new char('a');
+		std::cout << "constructor B" << std::endl;
 	};
 	virtual ~B() {
+		std::cout << "destructor B" << std::endl;
 		delete this->l;
 		this->l = nullptr;
 	};
@@ -19,13 +23,17 @@ public:
 
 class A : public B {
 public:
-	A():B(){};
+	A():B(){
+		std::cout << "constructor A" << std::endl;
+	};
 	A(const B* ex){
+		std::cout << "constructor A" << std::endl;
 		this->l = new char(*(ex->l));
 		this->i = ex->i;
 		if (ex->i == -1) throw "n";
 	}
 	~A() {
+		std::cout << "destructor B" << std::endl;
 		delete this->l;
 		this->l = nullptr;
 	};
@@ -40,13 +48,14 @@ public:
 	}
 };
 
-std::vector<int> test1(std::vector<B> vector= std::vector<B>()) {
+template <typename T>
+std::vector<int> test1(std::vector<T> vector= std::vector<T>()) {
 	std::vector<int> v;
 	std::vector<int> tmp;
 	tmp.assign(2600 * 10000, 1);
 	vector.assign(4200 * 10000, 1);
 	vector.insert(vector.end() - 1000 * 10000, tmp.begin(), tmp.end());
-	v.push_back(vector[3].i);
+	v.push_back(vector[3]);
 	v.push_back(vector.size());
 	v.push_back(vector.capacity());
 
@@ -68,13 +77,14 @@ std::vector<int> test1(std::vector<B> vector= std::vector<B>()) {
 	return v;
 }
 
-std::vector<int> test2(ft::vector<B> vector = ft::vector<B>()) {
+template <typename T>
+std::vector<int> test2(ft::vector<T> vector = ft::vector<T>()) {
 	std::vector<int> v;
 	ft::vector<int> tmp;
 	tmp.assign(2600 * 10000, 1);
 	vector.assign(4200 * 10000, 1);
 	vector.insert(vector.end() - 1000 * 10000, tmp.begin(), tmp.end());
-	v.push_back(vector[3].i);
+	v.push_back(vector[3]);
 	v.push_back(vector.size());
 	v.push_back(vector.capacity());
 
@@ -97,8 +107,9 @@ std::vector<int> test2(ft::vector<B> vector = ft::vector<B>()) {
 }
 
 int main() {
-	std::vector<int> v1 = test1();
-	std::vector<int> v2 = test2();
+	std::vector<int> v1 = test1<int>();
+	std::cout << "--------------------" << std::endl;
+	std::vector<int> v2 = test2<int>();
 
 	std::cout << (v1 == v2) << std::endl;
 }
