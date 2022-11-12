@@ -170,8 +170,7 @@ namespace ft {
 				if (p == &_array[_size]) {
 					construct_at_end(first, last);
 				} else {
-					std::memmove(static_cast<void *>(p + dist), static_cast<void *>(p),
-								 (&_array[_size] - p) * sizeof(value_type));
+					move_part_of_array(p + dist, p, (&_array[_size] - p) * sizeof(value_type));
 					pointer tmp = p;
 					for (; first != last; ++first, ++tmp, ++_size) {
 						_allocator.construct(tmp, *first);
@@ -197,6 +196,30 @@ namespace ft {
 				if (_array) _allocator.deallocate(_array, tmp_capacity);
 				_array = tmp;
 				_size += dist;
+			}
+			return iterator(p);
+		}
+
+		iterator erase(iterator pos) {
+			pointer p = _array + (pos - begin());
+
+			if (p == &_array[_size]) return end();
+			_allocator.destroy(p);
+			move_part_of_array(p + 1, p, (&_array[_size--] - p) * sizeof(value_type));
+			return iterator(p);
+		}
+
+		iterator erase(iterator first, iterator last) {
+			pointer p = _array + (first - begin());
+			size_type dist = std::distance(first, last);
+
+			if (first != last) {
+				while (first != last) {
+					_allocator.destroy(first.base());
+					++first;
+				}
+				move_part_of_array(p + dist, p, (&_array[_size] - p) * sizeof(value_type));
+				_size -= dist;
 			}
 			return iterator(p);
 		}
@@ -230,6 +253,10 @@ namespace ft {
 
 	private:
 
+		void move_part_of_array(pointer from, pointer to, size_t len) {
+			std::memmove(static_cast<void *>(to), static_cast<void *>(from), len);
+		}
+
 		void construct_at_end(size_type n, const_reference v) {
 			for (size_type j = 0; j < n; ++j, ++_size) {
 				_allocator.construct(&_array[_size], v);
@@ -260,7 +287,7 @@ namespace ft {
 				if (p == &_array[_size]) {
 					construct_at_end(count, value);
 				} else {
-					std::memmove(p + count, p, (&_array[_size] - p) * sizeof(value_type));
+					move_part_of_array(p + count, p, (&_array[_size] - p) * sizeof(value_type));
 					pointer tmp = p;
 					for (size_type i = 0; i < count; ++i, ++tmp) {
 						_allocator.construct(tmp, value);
