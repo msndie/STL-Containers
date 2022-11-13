@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include "Vector.hpp"
+#include "Stack.hpp"
+#include <stack>
 
 class B {
 public:
@@ -231,12 +233,18 @@ std::vector<int> test8(ft::vector<T> vector = ft::vector<T>()) {
 }
 
 int main() {
-	std::vector<int> v1 = test7<int>();
-	std::cout << "1--------------------1" << std::endl;
-	std::vector<int> v2 = test8<int>();
+	ft::stack<Test> s((ft::vector<Test>()));
 
-	std::cout << (v1 == v2) << std::endl;
+	std::cout << s.size() << std::endl;
 }
+
+//int main() {
+//	std::vector<int> v1 = test7<int>();
+//	std::cout << "1--------------------1" << std::endl;
+//	std::vector<int> v2 = test8<int>();
+//
+//	std::cout << (v1 == v2) << std::endl;
+//}
 
 //int main() {
 //	std::vector<int> v_std;
