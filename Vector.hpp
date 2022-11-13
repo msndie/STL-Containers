@@ -158,6 +158,7 @@ namespace ft {
 			return insert_helper(pos, count, value, true);
 		}
 
+//		TODO try to increase performance
 		template<class InputIt>
 		iterator insert(const_iterator pos, InputIt first, InputIt last,
 						typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = nullptr) {
@@ -209,6 +210,7 @@ namespace ft {
 			return iterator(p);
 		}
 
+//		TODO try to increase performance
 		iterator erase(iterator first, iterator last) {
 			pointer p = _array + (first - begin());
 			size_type dist = std::distance(first, last);
@@ -371,6 +373,37 @@ namespace ft {
 			_allocator.deallocate(buffer, range);
 		}
 	};
+
+	template< class T, class A >
+	bool operator==( const ft::vector<T,A>& lhs, const ft::vector<T,A>& rhs ) {
+		return lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+	}
+
+	template< class T, class A >
+	bool operator!=( const ft::vector<T,A>& lhs, const ft::vector<T,A>& rhs ) {
+		return !(lhs == rhs);
+	}
+
+	template< class T, class A >
+	bool operator<( const ft::vector<T,A>& lhs, const ft::vector<T,A>& rhs ) {
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+	}
+
+	template< class T, class A >
+	bool operator>( const ft::vector<T,A>& lhs, const ft::vector<T,A>& rhs ) {
+		return rhs < lhs;
+	}
+
+	template< class T, class A >
+	bool operator>=( const ft::vector<T,A>& lhs, const ft::vector<T,A>& rhs ) {
+		return !(lhs < rhs);
+	}
+
+	template< class T, class A >
+	bool operator<=( const ft::vector<T,A>& lhs, const ft::vector<T,A>& rhs ) {
+		return !(rhs < lhs);
+	}
+
 }
 
 namespace std {
