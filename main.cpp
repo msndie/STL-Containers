@@ -3,6 +3,8 @@
 #include "Vector.hpp"
 #include "Stack.hpp"
 #include <stack>
+#include <map>
+#include <set>
 
 class B {
 public:
