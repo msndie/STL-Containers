@@ -2,6 +2,7 @@
 #include <vector>
 #include "Vector.hpp"
 #include "Stack.hpp"
+#include "Map.hpp"
 #include <stack>
 #include <map>
 #include <set>
@@ -235,9 +236,11 @@ std::vector<int> test8(ft::vector<T> vector = ft::vector<T>()) {
 }
 
 int main() {
+	ft::map<int, Test> map;
 	ft::stack<Test> s((ft::vector<Test>()));
 
 	std::cout << s.size() << std::endl;
+	map.insert_node(ft::make_pair(10, 5));
 }
 
 //int main() {
