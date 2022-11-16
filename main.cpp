@@ -47,6 +47,7 @@ public:
 class Test {
 public:
 	int x;
+//	Test() : x() {}
 	explicit Test(int x) : x(x) {std::cout << "constructor" << std::endl;}
 	~Test() {
 		std::cout << "destructor" << std::endl;
@@ -236,11 +237,12 @@ std::vector<int> test8(ft::vector<T> vector = ft::vector<T>()) {
 }
 
 int main() {
+	Test test(5);
 	ft::map<int, Test> map;
 	ft::stack<Test> s((ft::vector<Test>()));
 
 	std::cout << s.size() << std::endl;
-	map.insert_node(ft::make_pair(10, 5));
+	map.insert(ft::make_pair(10, test));
 }
 
 //int main() {

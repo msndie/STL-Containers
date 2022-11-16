@@ -7,38 +7,67 @@
 #define RED true
 #define BLACK false
 #define COLOR bool
-#define NIL _sentinel
+#define NIL &_sentinel
 
 namespace ft {
 
 	template <class T>
 	struct node {
 		COLOR			color;
-		bool			NIL;
+//		bool			nil;
 		struct node*	parent;
 		struct node*	left;
 		struct node*	right;
-		T*				data;
+		T				data;
 
-		node() : color(BLACK), NIL(true), parent(nullptr), left(this), right(this), data(new T()) {}
-		node(const T& data) : color(BLACK), NIL(false), parent(nullptr), left(this), right(this), data(new T(data)) {}
-		~node() { delete data; }
+//		node() : color(BLACK), nil(true), parent(nullptr), left(this), right(this), data() {}
+//		node(const T& data) : color(BLACK), nil(false), parent(nullptr), left(this), right(this), data(data) {}
+		node() : color(BLACK), parent(nullptr), left(this), right(this), data() {}
+		node(const T& data) : color(BLACK), parent(nullptr), left(this), right(this), data(data) {}
+		~node() {}
 	};
 
-	template <class T, class A = std::allocator<node<T> > >
+	template <class T, class Compare, class Alloc>
 	class tree {
 	public:
 		typedef T	value_type;
-		typedef A	allocator;
+		typedef Alloc	allocator_type;
 
 		node<T>			_sentinel;
 		node<T>*		_root;
 	private:
-		allocator		_alloc;
+		allocator_type		_alloc;
+		Compare				_comp;
 
 	public:
-		tree(const A& alloc) : _root(&_sentinel), _alloc(alloc) {}
+		tree(const Compare& comp, const Alloc& alloc) : _root(&_sentinel), _alloc(alloc), _comp(comp) {}
 		~tree() {}
+
+		void insert_node(const value_type& value) {
+			ft::node<value_type>	*current, *parent, *x;
+
+			current = _root;
+			parent = nullptr;
+			while (current != NIL) {
+				if (value.first == current->data.first) return;
+				parent = current;
+				current = _comp(value, current->data) ? current->left : current->right;
+			}
+			x = _alloc.allocate(sizeof(*x));
+			_alloc.construct(x, node<value_type>(value));
+			x->color = RED;
+			x->right = NIL;
+			x->left = NIL;
+			x->parent = parent;
+			if (parent) {
+				if (_comp(value, parent->data)) parent->left = x;
+				else parent->right = x;
+			} else {
+				_root = x;
+			}
+			insertFixup(x);
+//			return;
+		}
 
 		void deleteNode(node<T>* z) {
 			node<T>	*y, *x;
