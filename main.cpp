@@ -271,8 +271,47 @@ std::vector<int> copy_constructor_test2(ft::map<T, V> mp) {
 	return v;
 }
 
+template <class T, class V>
+std::vector<int> assign_overload_test1(std::map<T, V> mp) {
+	std::vector<int> v;
+	for (int i = 0, j = 10; i < 20 * 10000; ++i, ++j)
+		mp.insert(std::make_pair(i, j));
+	std::map<T, V> mp2;
+	for (int i = 20 * 10000, j = 200010; i < 40 * 10000; ++i, ++j)
+		mp2.insert(std::make_pair(i, j));
+	mp2 = mp;
+	typename std::map<T, V>::iterator it = mp2.begin();
+	for (; it != mp2.end(); it++) {
+		v.push_back(it->first);
+		v.push_back(it->second);
+	}
+	v.push_back(mp2.size());
+	return v;
+}
+
+template <class T, class V>
+std::vector<int> assign_overload_test2(ft::map<T, V> mp) {
+	std::vector<int> v;
+	for (int i = 0, j = 10; i < 20 * 10000; ++i, ++j)
+		mp.insert(ft::make_pair(i, j));
+	ft::map<T, V> mp2;
+	for (int i = 20 * 10000, j = 200010; i < 40 * 10000; ++i, ++j)
+		mp2.insert(ft::make_pair(i, j));
+	mp2 = mp;
+	typename ft::map<T, V>::iterator it = mp2.begin();
+	for (; it != mp2.end(); it++) {
+		v.push_back(it->first);
+		v.push_back(it->second);
+	}
+	v.push_back(mp2.size());
+	return v;
+}
+
 int main() {
-	std::vector<int> v = copy_constructor_test2<int, int>(ft::map<int, int>());
+	std::vector<int> v = assign_overload_test2<int, int>(ft::map<int, int>());
+	std::vector<int> v2 = assign_overload_test1<int, int>(std::map<int,int>());
+
+	std::cout << (v == v2) << std::endl;
 }
 
 //int main() {

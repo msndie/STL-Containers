@@ -21,8 +21,6 @@ namespace ft {
 		struct node*	right;
 		T				data;
 
-//		node() : color(BLACK), nil(true), parent(nullptr), left(this), right(this), data() {}
-//		node(const T& data) : color(BLACK), nil(false), parent(nullptr), left(this), right(this), data(data) {}
 		node() : color(BLACK), nil(true), parent(nullptr), left(this), right(this), data() {}
 		node(const T& data) : color(BLACK), nil(false), parent(nullptr), left(this), right(this), data(data) {}
 		~node() {}
@@ -32,22 +30,27 @@ namespace ft {
 	class tree {
 	public:
 		typedef T															value_type;
+		typedef ft::node<value_type>										node_type;
+		typedef node_type*													node_pointer;
 		typedef Alloc														allocator_type;
 		typedef typename allocator_type::difference_type					difference_type;
 		typedef typename ft::node_iterator<node<T>*, T, difference_type>		iterator;
 		typedef typename ft::node_iterator<const node<T>*, T, difference_type>	const_iterator;
 		typedef typename ft::reverse_iterator<iterator>						reverse_iterator;
 		typedef typename ft::reverse_iterator<const_iterator >				const_reverse_iterator;
+		typedef std::size_t														size_type;
 
-		node<T>			_sentinel;
-		node<T>*		_root;
+		node_type 			_sentinel;
+		node_pointer 		_root;
 	private:
 		allocator_type		_alloc;
 		Compare				_comp;
+		size_type			_size;
+
 
 	public:
-		tree(const Compare& comp, const Alloc& alloc) : _root(NIL), _alloc(alloc), _comp(comp) {}
-		tree(const tree& other) : _root(NIL), _alloc(other._alloc), _comp(other._comp) {
+		tree(const Compare& comp, const Alloc& alloc) : _root(NIL), _alloc(alloc), _comp(comp), _size(0) {}
+		tree(const tree& other) : _root(NIL), _alloc(other._alloc), _comp(other._comp), _size(0) {
 			iterator it = iterator(other.begin());
 			iterator end = iterator(other.end());
 
@@ -56,18 +59,36 @@ namespace ft {
 				++it;
 			}
 		}
-		~tree() {}
-
-		node<value_type>* begin() const {
-			node<value_type>* tmp = _root;
-
-			while (tmp->left != NIL) {
-				tmp = tmp->left;
+		~tree() { clear(_root); }
+		tree& operator=(const tree& other) {
+			if (&other != this) {
+				_size = 0;
+				clear(_root);
+				_root = NIL;
+				if (std::allocator_traits<allocator_type>::propagate_on_container_copy_assignment::value) {
+					_alloc = other._alloc;
+				}
+				iterator it = iterator(other.begin());
+				iterator end = iterator(other.end());
+				while (it != end)
+					insert_node(_root, *it++);
 			}
-			return tmp;
+			return *this;
 		}
 
-		node<value_type>* begin() {
+		size_type size() const {
+			return _size;
+		}
+
+		void clear(node_pointer tmp) {
+			if (tmp == NIL) return;
+			if (tmp->left != NIL) clear(tmp->left);
+			if (tmp->right != NIL) clear(tmp->right);
+			_alloc.destroy(tmp);
+			_alloc.deallocate(tmp, sizeof(node_type));
+		}
+
+		node<value_type>* begin() const {
 			node<value_type>* tmp = _root;
 
 			while (tmp->left != NIL) {
@@ -85,25 +106,6 @@ namespace ft {
 			return tmp;
 		}
 
-		node<value_type>* last() {
-			node<value_type>* tmp = _root;
-
-			while (tmp->right != NIL) {
-				tmp = tmp->right;
-			}
-			return tmp;
-		}
-
-		node<value_type>* end() {
-			node<value_type>* tmp = _root;
-
-			while (tmp != NIL) {
-				tmp = tmp->right;
-			}
-			return tmp;
-//			return &_sentinel;
-		}
-
 		node<value_type>* end() const {
 			node<value_type>* tmp = _root;
 
@@ -111,7 +113,6 @@ namespace ft {
 				tmp = tmp->right;
 			}
 			return tmp;
-//			return NIL;
 		}
 
 		node<value_type>* findNode(const value_type& value) {
@@ -149,6 +150,7 @@ namespace ft {
 				_root = x;
 			}
 			insertFixup(x);
+			++_size;
 			return ft::make_pair< iterator, bool >(iterator(x),true);
 		}
 
@@ -187,6 +189,7 @@ namespace ft {
 			}
 			_alloc.destruct(y);
 			_alloc.deallocate(y);
+			--_size;
 		}
 
 		void deleteFixup(node<T>* x) {

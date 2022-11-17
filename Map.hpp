@@ -86,9 +86,18 @@ namespace ft {
 		}
 //
 		map(const map& other) : _alloc(other._alloc), _tree(other._tree) {}
-
 		~map() {}
+		map& operator=(const map& other) {
+			if (&other != this) {
+				if (std::allocator_traits<allocator_type>::propagate_on_container_copy_assignment::value) {
+					_alloc = other._alloc;
+				}
+				_tree = other._tree;
+			}
+			return *this;
+		}
 
+		size_type size() const { return _tree.size(); }
 		iterator begin() { return iterator(_tree.begin()); }
 		const_iterator begin() const { return const_iterator(_tree.begin()); }
 		iterator end() { return iterator(_tree.end()); }
@@ -97,6 +106,7 @@ namespace ft {
 		const_reverse_iterator rbegin() const { return const_reverse_iterator(_tree.last()); }
 		reverse_iterator rend() { return reverse_iterator(_tree.end()); }
 		const_reverse_iterator rend() const { return const_reverse_iterator(_tree.end()); }
+
 
 
 		pair<iterator, bool> insert(const value_type& value) {
