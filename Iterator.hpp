@@ -61,30 +61,101 @@ namespace ft {
 
 		template< class U >
 		iterator& operator=( const iterator<U>& other ) { _value = other._value; return *this; }
-
 		iterator& operator++() { ++_value; return *this; }
-
 		iterator& operator--() { --_value; return *this; }
-
 		iterator operator++(int) { iterator tmp(*this); ++(*this); return tmp; }
-
 		iterator operator--(int) { iterator tmp(*this); --(*this); return tmp; }
-
 		iterator operator-(difference_type n) const { return *this + (-n); }
-
 		iterator& operator-=(difference_type n) { *this += -n; return *this; }
-
 		iterator operator+(difference_type n) const { iterator tmp(*this); tmp += n; return tmp; }
-
 		iterator& operator+=(difference_type n) { _value += n; return (*this); }
-
 		reference operator*() const { return *_value; }
-
 		pointer operator->() const { return &(*_value); }
-
 		reference operator[](difference_type n) { return _value[n]; }
-
 		iterator_type base() const { return _value; }
+	};
+
+	template <class Node, class Pair, class DiffType>
+	class node_iterator {
+	private:
+		Node _node;
+	public:
+//		typedef T															iterator_type;
+//		typedef typename iterator_traits<iterator_type>::value_type			value_type;
+//		typedef DiffType													difference_type;
+//		typedef typename iterator_traits<iterator_type>::reference			reference;
+//		typedef const reference 											const_reference;
+//		typedef typename iterator_traits<iterator_type>::pointer			pointer;
+//		typedef const pointer 												const_pointer;
+//		typedef typename iterator_traits<iterator_type>::iterator_category	iterator_category;
+		typedef Node															iterator_type;
+		typedef Pair			value_type;
+		typedef DiffType													difference_type;
+		typedef Pair&			reference;
+		typedef const Pair& 											const_reference;
+		typedef Pair*			pointer;
+		typedef const pointer 												const_pointer;
+		typedef std::random_access_iterator_tag	iterator_category;
+
+		node_iterator() : _node() {}
+		explicit node_iterator(Node value) : _node(value) {}
+		template <class N, class P, class D>
+		node_iterator(const node_iterator<N, P, D>& other,
+					  typename ft::enable_if<std::is_convertible<N, Node>::value>::type* = 0)
+				: _node(other.base()) {}
+		~node_iterator() {}
+
+		iterator_type base() const { return _node; }
+		node_iterator &operator=(const node_iterator &other) { _node = other._node; return *this; }
+		node_iterator operator++(int) { node_iterator tmp(*this); next(); return tmp; }
+		node_iterator &operator++() { next(); return *this; }
+		node_iterator operator--(int) { node_iterator tmp(*this); prev(); return tmp; }
+		node_iterator &operator--() { prev(); return *this; }
+		reference operator*() { return _node->data; }
+		const_reference operator*() const { return _node->data; }
+		pointer operator->() { return &_node->data; }
+		const_pointer operator->() const { return &_node->data; }
+		bool operator==(node_iterator const &obj) const { return _node == obj._node; }
+		bool operator!=(node_iterator const &obj) const { return _node != obj._node; }
+		bool operator>(node_iterator const &obj) const { return _node->data > obj._node->data; }
+		bool operator<(node_iterator const &obj) const { return obj._node->data > _node->data; }
+		bool operator<=(node_iterator const &obj) const { return _node->data <= obj._node->data; }
+		bool operator>=(node_iterator const &obj) const { return _node->data >= obj._node->data; }
+	private:
+		void next() {
+			if (!_node->right->nil) {
+				_node = _node->right;
+				while (!_node->left->nil)
+					_node = _node->left;
+			} else {
+				Node current = _node;
+				Node tmp = _node;
+				_node = _node->parent;
+				if (!_node) { _node = current->right; return; }
+				while (_node->left != tmp) {
+					if (!_node->parent) { _node = current->right; break; }
+					tmp = _node;
+					_node = _node->parent;
+				}
+			}
+		}
+
+		void prev() {
+			if (_node->nil) _node = _node->parent;
+			else if (!_node->left->nil) {
+				_node = _node->left;
+				while (!_node->right->nil)
+					_node = _node->right;
+			} else {
+				Node tmp = _node;
+				_node = _node->parent;
+				while (_node->right != tmp) {
+					tmp = _node;
+					if (!_node->parent) { _node = tmp->left - 1; break; }
+					_node = _node->parent;
+				}
+			}
+		}
 	};
 
 	template <class T>

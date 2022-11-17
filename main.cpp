@@ -47,7 +47,7 @@ public:
 class Test {
 public:
 	int x;
-//	Test() : x() {}
+	Test() : x() {}
 	explicit Test(int x) : x(x) {std::cout << "constructor" << std::endl;}
 	~Test() {
 		std::cout << "destructor" << std::endl;
@@ -236,14 +236,53 @@ std::vector<int> test8(ft::vector<T> vector = ft::vector<T>()) {
 	return v;
 }
 
-int main() {
-	Test test(5);
-	ft::map<int, Test> map;
-	ft::stack<Test> s((ft::vector<Test>()));
+template <class T, class V>
+std::vector<int> copy_constructor_test1(std::map<T, V> mp) {
 
-	std::cout << s.size() << std::endl;
-	map.insert(ft::make_pair(10, test));
+	std::vector<int> v;
+
+	for (int i = 0, j = 10; i < 30 * 10000; ++i, ++j) {
+		mp.insert(std::make_pair(i, j));
+	}
+	std::map<int, int> mp2(mp.begin(), mp.end());
+	std::map<int, int>::iterator it = mp2.begin();
+	for (int i = 0; i < 30 * 10000; ++i, it++) {
+		v.push_back(it->first);
+		v.push_back(it->second);
+	}
+	return v;
 }
+
+template <class T, class V>
+std::vector<int> copy_constructor_test2(ft::map<T, V> mp) {
+
+	std::vector<int> v;
+
+	for (int i = 0, j = 10; i < 30 * 10000; ++i, ++j) {
+		mp.insert(ft::make_pair(i, j));
+		std::cout << i << std::endl;
+	}
+	ft::map<int, int> mp2(mp.begin(), mp.end());
+	ft::map<int, int>::iterator it = mp2.begin();
+	for (int i = 0; i < 30 * 10000; ++i, it++) {
+		v.push_back(it->first);
+		v.push_back(it->second);
+	}
+	return v;
+}
+
+int main() {
+	std::vector<int> v = copy_constructor_test2<int, int>(ft::map<int, int>());
+}
+
+//int main() {
+//	std::cout << "kek\n";
+//	Test test(5);
+//	ft::map<int, Test> map;
+//
+//	map.insert(ft::make_pair(10, test));
+//	map.begin()->first = 1;
+//}
 
 //int main() {
 //	std::vector<int> v1 = test7<int>();

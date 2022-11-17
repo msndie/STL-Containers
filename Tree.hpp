@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <memory>
+#include "Iterator.hpp"
 
 #define RED true
 #define BLACK false
@@ -14,7 +15,7 @@ namespace ft {
 	template <class T>
 	struct node {
 		COLOR			color;
-//		bool			nil;
+		bool			nil;
 		struct node*	parent;
 		struct node*	left;
 		struct node*	right;
@@ -22,16 +23,21 @@ namespace ft {
 
 //		node() : color(BLACK), nil(true), parent(nullptr), left(this), right(this), data() {}
 //		node(const T& data) : color(BLACK), nil(false), parent(nullptr), left(this), right(this), data(data) {}
-		node() : color(BLACK), parent(nullptr), left(this), right(this), data() {}
-		node(const T& data) : color(BLACK), parent(nullptr), left(this), right(this), data(data) {}
+		node() : color(BLACK), nil(true), parent(nullptr), left(this), right(this), data() {}
+		node(const T& data) : color(BLACK), nil(false), parent(nullptr), left(this), right(this), data(data) {}
 		~node() {}
 	};
 
 	template <class T, class Compare, class Alloc>
 	class tree {
 	public:
-		typedef T	value_type;
-		typedef Alloc	allocator_type;
+		typedef T															value_type;
+		typedef Alloc														allocator_type;
+		typedef typename allocator_type::difference_type					difference_type;
+		typedef typename ft::node_iterator<node<T>*, T, difference_type>		iterator;
+		typedef typename ft::node_iterator<const node<T>*, T, difference_type>	const_iterator;
+		typedef typename ft::reverse_iterator<iterator>						reverse_iterator;
+		typedef typename ft::reverse_iterator<const_iterator >				const_reverse_iterator;
 
 		node<T>			_sentinel;
 		node<T>*		_root;
@@ -40,16 +46,93 @@ namespace ft {
 		Compare				_comp;
 
 	public:
-		tree(const Compare& comp, const Alloc& alloc) : _root(&_sentinel), _alloc(alloc), _comp(comp) {}
+		tree(const Compare& comp, const Alloc& alloc) : _root(NIL), _alloc(alloc), _comp(comp) {}
+		tree(const tree& other) : _root(NIL), _alloc(other._alloc), _comp(other._comp) {
+			iterator it = iterator(other.begin());
+			iterator end = iterator(other.end());
+
+			while (it != end) {
+				insert_node(_root, it.base()->data);
+				++it;
+			}
+		}
 		~tree() {}
 
-		void insert_node(const value_type& value) {
-			ft::node<value_type>	*current, *parent, *x;
+		node<value_type>* begin() const {
+			node<value_type>* tmp = _root;
 
-			current = _root;
+			while (tmp->left != NIL) {
+				tmp = tmp->left;
+			}
+			return tmp;
+		}
+
+		node<value_type>* begin() {
+			node<value_type>* tmp = _root;
+
+			while (tmp->left != NIL) {
+				tmp = tmp->left;
+			}
+			return tmp;
+		}
+
+		node<value_type>* last() const {
+			node<value_type>* tmp = _root;
+
+			while (tmp->right != NIL) {
+				tmp = tmp->right;
+			}
+			return tmp;
+		}
+
+		node<value_type>* last() {
+			node<value_type>* tmp = _root;
+
+			while (tmp->right != NIL) {
+				tmp = tmp->right;
+			}
+			return tmp;
+		}
+
+		node<value_type>* end() {
+			node<value_type>* tmp = _root;
+
+			while (tmp != NIL) {
+				tmp = tmp->right;
+			}
+			return tmp;
+//			return &_sentinel;
+		}
+
+		node<value_type>* end() const {
+			node<value_type>* tmp = _root;
+
+			while (tmp != NIL) {
+				tmp = tmp->right;
+			}
+			return tmp;
+//			return NIL;
+		}
+
+		node<value_type>* findNode(const value_type& value) {
+			node<value_type> *current = _root;
+
+			while(current != NIL) {
+				if(value == current->data)
+					return current;
+				else
+					current = _comp(value, current->data) ? current->left : current->right;
+			}
+			return nullptr;
+		}
+
+		pair<iterator, bool> insert_node(node<value_type> *hint, const value_type& value) {
+			node<value_type>	*current, *parent, *x;
+
+			current = hint;
 			parent = nullptr;
 			while (current != NIL) {
-				if (value.first == current->data.first) return;
+				if (value.first == current->data.first) return ft::make_pair(iterator(current),false);
 				parent = current;
 				current = _comp(value, current->data) ? current->left : current->right;
 			}
@@ -66,7 +149,7 @@ namespace ft {
 				_root = x;
 			}
 			insertFixup(x);
-//			return;
+			return ft::make_pair< iterator, bool >(iterator(x),true);
 		}
 
 		void deleteNode(node<T>* z) {
