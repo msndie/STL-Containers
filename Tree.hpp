@@ -16,13 +16,14 @@ namespace ft {
 	struct node {
 		COLOR			color;
 		bool			nil;
+		struct node*	begin;
 		struct node*	parent;
 		struct node*	left;
 		struct node*	right;
 		T				data;
 
-		node() : color(BLACK), nil(true), parent(nullptr), left(this), right(this), data() {}
-		node(const T& data) : color(BLACK), nil(false), parent(nullptr), left(this), right(this), data(data) {}
+		node() : color(BLACK), nil(true), begin(this), parent(nullptr), left(this), right(this), data() {}
+		node(const T& data) : color(BLACK), nil(false), begin(this), parent(nullptr), left(this), right(this), data(data) {}
 		~node() {}
 	};
 
@@ -37,7 +38,7 @@ namespace ft {
 		typedef typename ft::node_iterator<node<T>*, T, difference_type>		iterator;
 		typedef typename ft::node_iterator<const node<T>*, T, difference_type>	const_iterator;
 		typedef typename ft::reverse_iterator<iterator>						reverse_iterator;
-		typedef typename ft::reverse_iterator<const_iterator >				const_reverse_iterator;
+		typedef typename ft::reverse_iterator<const_iterator>				const_reverse_iterator;
 		typedef std::size_t														size_type;
 
 		node_type 			_sentinel;
@@ -109,13 +110,13 @@ namespace ft {
 		node<value_type>* end() const {
 			node<value_type>* tmp = _root;
 
-			while (tmp != NIL) {
+			while (tmp->right != NIL) {
 				tmp = tmp->right;
 			}
-			return tmp;
+			return tmp->right;
 		}
 
-		node<value_type>* findNode(const value_type& value) {
+		node<value_type>* find_node(const value_type& value) {
 			node<value_type> *current = _root;
 
 			while(current != NIL) {
@@ -150,45 +151,34 @@ namespace ft {
 				_root = x;
 			}
 			insertFixup(x);
+			if (x == last()) _sentinel.parent = x;
+			if (x == begin()) _sentinel.begin = x;
 			++_size;
 			return ft::make_pair< iterator, bool >(iterator(x),true);
 		}
 
-		void deleteNode(node<T>* z) {
+		void delete_node(node<T>* z) {
 			node<T>	*y, *x;
 
 			if (!z || z == NIL) return;
-			if (z->left == NIL || z->right == NIL) {
-				y = z;
-			} else {
+			if (z->left == NIL || z->right == NIL) y = z;
+			else {
 				y = z->right;
-				while (y->left != NIL) {
-					y = y->left;
-				}
+				while (y->left != NIL) y = y->left;
 			}
-			if (y->left != NIL) {
-				x = y->left;
-			} else {
-				x = y->right;
-			}
+			if (y->left != NIL) x = y->left;
+			else x = y->right;
 			x->parent = y->parent;
 			if (y->parent) {
-				if (y == y->parent->left) {
-					y->parent->left = x;
-				} else {
-					y->parent->right = x;
-				}
-			} else {
-				_root = x;
-			}
-			if (y != z) {
-				z->data = y->data;
-			}
-			if (y->color == BLACK) {
-				deleteFixup(x);
-			}
-			_alloc.destruct(y);
-			_alloc.deallocate(y);
+				if (y == y->parent->left) y->parent->left = x;
+				else y->parent->right = x;
+			} else _root = x;
+			if (y != z) copy_data_to_node(z, y->data);
+			if (y->color == BLACK) deleteFixup(x);
+			_alloc.destroy(y);
+			_alloc.deallocate(y, sizeof(node_type));
+			_sentinel.parent = last();
+			_sentinel.begin = begin();
 			--_size;
 		}
 
@@ -294,50 +284,41 @@ namespace ft {
 			node<T>* y = x->left;
 
 			x->left = y->right;
-			if (y->right != NIL) {
-				y->right->parent = x;
-			}
-			if (y != NIL) {
-				y->parent = x->parent;
-			}
+			if (y->right != NIL) y->right->parent = x;
+			if (y != NIL) y->parent = x->parent;
 			if (x->parent) {
-				if (x == x->parent->right) {
-					x->parent->right = y;
-				} else {
-					x->parent->left = y;
-				}
-			} else {
-				_root = y;
-			}
+				if (x == x->parent->right) x->parent->right = y;
+				else x->parent->left = y;
+			} else _root = y;
 			y->right = x;
-			if (x != NIL) {
-				x->parent = y;
-			}
+			if (x != NIL) x->parent = y;
 		}
 
 		void rotateLeft(node<T>* x) {
 			node<T>* y = x->right;
 
 			x->right = y->left;
-			if (y->left != NIL) {
-				y->left->parent = x;
-			}
-			if (y != NIL) {
-				y->parent = x->parent;
-			}
+			if (y->left != NIL) y->left->parent = x;
+			if (y != NIL) y->parent = x->parent;
 			if (x->parent) {
-				if (x == x->parent->left) {
-					x->parent->left = y;
-				} else {
-					x->parent->right = y;
-				}
-			} else {
-				_root = y;
-			}
+				if (x == x->parent->left) x->parent->left = y;
+				else x->parent->right = y;
+			} else _root = y;
 			y->left = x;
-			if (x != NIL) {
-				x->parent = y;
-			}
+			if (x != NIL) x->parent = y;
+		}
+
+		void copy_data_to_node(node<value_type>* n, const value_type& v) {
+			node<value_type> *child_l, *child_r, *parent;
+
+			child_l = n->left;
+			child_r = n->right;
+			parent = n->parent;
+			_alloc.destroy(n);
+			_alloc.construct(n, node<value_type>(v));
+			n->left = child_l;
+			n->right = child_r;
+			n->parent = parent;
 		}
 
 	};

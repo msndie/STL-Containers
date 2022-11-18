@@ -63,8 +63,8 @@ namespace ft {
 		iterator& operator=( const iterator<U>& other ) { _value = other._value; return *this; }
 		iterator& operator++() { ++_value; return *this; }
 		iterator& operator--() { --_value; return *this; }
-		iterator operator++(int) { iterator tmp(*this); ++(*this); return tmp; }
-		iterator operator--(int) { iterator tmp(*this); --(*this); return tmp; }
+		iterator operator++(int) { iterator tmp(*this); ++_value; return tmp; }
+		iterator operator--(int) { iterator tmp(*this); --_value; return tmp; }
 		iterator operator-(difference_type n) const { return *this + (-n); }
 		iterator& operator-=(difference_type n) { *this += -n; return *this; }
 		iterator operator+(difference_type n) const { iterator tmp(*this); tmp += n; return tmp; }
@@ -80,14 +80,6 @@ namespace ft {
 	private:
 		Node _node;
 	public:
-//		typedef T															iterator_type;
-//		typedef typename iterator_traits<iterator_type>::value_type			value_type;
-//		typedef DiffType													difference_type;
-//		typedef typename iterator_traits<iterator_type>::reference			reference;
-//		typedef const reference 											const_reference;
-//		typedef typename iterator_traits<iterator_type>::pointer			pointer;
-//		typedef const pointer 												const_pointer;
-//		typedef typename iterator_traits<iterator_type>::iterator_category	iterator_category;
 		typedef Node															iterator_type;
 		typedef Pair			value_type;
 		typedef DiffType													difference_type;
@@ -123,7 +115,8 @@ namespace ft {
 		bool operator>=(node_iterator const &obj) const { return _node->data >= obj._node->data; }
 	private:
 		void next() {
-			if (!_node->right->nil) {
+			if (_node->nil && _node->begin != _node) _node = _node->begin;
+			else if (!_node->right->nil) {
 				_node = _node->right;
 				while (!_node->left->nil)
 					_node = _node->left;
@@ -182,9 +175,9 @@ namespace ft {
 
 		iterator_type base() const { return _value; }
 
-		reference operator*() const { iterator_type  tmp = _value; return *--tmp; }
+		reference operator*() { return *_value; }
 
-		pointer operator->() const { return &operator*(); }
+		pointer operator->() { return &operator*(); }
 
 		reverse_iterator& operator++() { --_value; return *this; }
 
