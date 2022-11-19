@@ -86,7 +86,7 @@ namespace ft {
 		typedef Pair&			reference;
 		typedef const Pair& 											const_reference;
 		typedef Pair*			pointer;
-		typedef const pointer 												const_pointer;
+		typedef const Pair* 												const_pointer;
 		typedef std::random_access_iterator_tag	iterator_category;
 
 		node_iterator() : _node() {}

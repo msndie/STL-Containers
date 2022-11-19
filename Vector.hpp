@@ -408,7 +408,7 @@ namespace ft {
 
 namespace std {
 	template< class T, class A >
-	void swap(ft::vector<T, A>& x, ft::vector<T,A>& y) {
+	void swap(ft::vector<T,A>& x, ft::vector<T,A>& y) {
 		x.swap(y);
 	}
 }
