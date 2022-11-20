@@ -3,6 +3,7 @@
 .idea
 cmake-build-debug
 ft_containers-unit-test
+containers_test
 
 # Compiled Object files
 *.slo

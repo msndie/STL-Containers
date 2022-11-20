@@ -30,9 +30,9 @@ namespace ft {
 
 	public:
 
-		explicit vector(const A& alloc = A()) : _array(nullptr), _allocator(alloc), _size(0), _capacity(0) {}
+		explicit vector(const A& alloc = A()) : _array(nullptr), _size(0), _capacity(0), _allocator(alloc) {}
 
-		explicit vector(size_type count, const_reference value = T(), const A& alloc = A()) : _size(count), _capacity(count), _array(nullptr), _allocator(alloc) {
+		explicit vector(size_type count, const_reference value = T(), const A& alloc = A()) : _array(nullptr), _size(count), _capacity(count), _allocator(alloc) {
 			_array = _allocator.allocate(count);
 			for (size_type i = 0; i < _size; ++i) {
 				_array[i] = value;
@@ -50,7 +50,7 @@ namespace ft {
 		template<class InputIt>
 		vector(InputIt first, InputIt last, const A& alloc = A(),
 			   typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = nullptr)
-			   : _array(nullptr), _allocator(alloc), _size(0), _capacity(0) {
+			   : _array(nullptr), _size(0), _capacity(0), _allocator(alloc) {
 			assign(first, last);
 		}
 
@@ -75,8 +75,8 @@ namespace ft {
 			return *this;
 		}
 
-		const_reference operator[](size_type pos) { return _array[pos]; }
-		reference operator[](size_type pos) const { return _array[pos]; }
+		reference operator[](size_type pos) { return _array[pos]; }
+		const_reference operator[](size_type pos) const { return _array[pos]; }
 		allocator_type get_allocator() const { return _allocator; }
 		reference front() { return _array[0]; }
 		const_reference front() const { return _array[0]; }
@@ -86,7 +86,7 @@ namespace ft {
 		const_pointer data() const { return _array; }
 		bool empty() const { return _size == 0; }
 		size_type size() const { return _size; }
-		size_type capacity() { return _capacity; }
+		size_type capacity() const { return _capacity; }
 		iterator begin() { return iterator(_array); }
 		const_iterator begin() const { return const_iterator(_array); }
 		iterator end() { return iterator(&_array[_size]); }

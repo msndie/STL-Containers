@@ -3,12 +3,17 @@
 #include "Vector.hpp"
 #include "Stack.hpp"
 #include "Map.hpp"
+#include "Set.hpp"
 #include <stack>
 #include <map>
 #include <set>
+#include <string>
 
 #define _ratio 1
 #define _map ft::map
+#define _set ft::set
+#define TESTED_TYPE int
+#define TESTED_NAMESPACE ft
 
 class B {
 public:
@@ -56,10 +61,3 @@ public:
 		std::cout << "destructor" << std::endl;
 	}
 };
-
-int main() {
-	std::vector<int> v1 = 1<int,int>(std::map<int, int>());
-	std::vector<int> v2 = 2<int,int>(ft::map<int, int>());
-
-	std::cout << (v1 == v2) << std::endl;
-}

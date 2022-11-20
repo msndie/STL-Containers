@@ -103,7 +103,7 @@ namespace ft {
 		node_iterator &operator++() { next(); return *this; }
 		node_iterator operator--(int) { node_iterator tmp(*this); prev(); return tmp; }
 		node_iterator &operator--() { prev(); return *this; }
-		reference operator*() { return _node->data; }
+		reference operator*() { return const_cast<Pair&>(_node->data); }
 		const_reference operator*() const { return _node->data; }
 		pointer operator->() { return &_node->data; }
 		const_pointer operator->() const { return &_node->data; }

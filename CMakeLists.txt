@@ -4,4 +4,4 @@ project(STL_Containers)
 set(CMAKE_CXX_STANDARD 98)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -g")
 
-add_executable(STL_Containers main.cpp Vector.hpp Iterator.hpp Utility.hpp Stack.hpp Map.hpp Tree.hpp)
+add_executable(STL_Containers main.cpp Vector.hpp Iterator.hpp Utility.hpp Stack.hpp Map.hpp Tree.hpp Set.hpp)

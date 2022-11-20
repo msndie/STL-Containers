@@ -30,15 +30,16 @@ namespace ft {
 	template <class T, class Compare, class Alloc>
 	class tree {
 	public:
-		typedef T															value_type;
-		typedef ft::node<value_type>										node_type;
-		typedef node_type*													node_pointer;
-		typedef Alloc														allocator_type;
-		typedef typename allocator_type::difference_type					difference_type;
+		typedef T																value_type;
+		typedef ft::node<value_type>											node_type;
+		typedef node_type*														node_pointer;
+		typedef const node_pointer												const_node_pointer;
+		typedef Alloc															allocator_type;
+		typedef typename allocator_type::difference_type						difference_type;
 		typedef typename ft::node_iterator<node<T>*, T, difference_type>		iterator;
 		typedef typename ft::node_iterator<const node<T>*, T, difference_type>	const_iterator;
-		typedef typename ft::reverse_iterator<iterator>						reverse_iterator;
-		typedef typename ft::reverse_iterator<const_iterator>				const_reverse_iterator;
+		typedef typename ft::reverse_iterator<iterator>							reverse_iterator;
+		typedef typename ft::reverse_iterator<const_iterator>					const_reverse_iterator;
 		typedef std::size_t														size_type;
 
 		node_type 			_sentinel;
@@ -113,25 +114,13 @@ namespace ft {
 			return tmp->right;
 		}
 
-		node<value_type>* find_node(const value_type& value) {
-			node<value_type> *current = _root;
-
-			while(current != NIL) {
-				if(value == current->data)
-					return current;
-				else
-					current = _comp(value, current->data) ? current->left : current->right;
-			}
-			return nullptr;
-		}
-
 		pair<iterator, bool> insert_node(node<value_type> *hint, const value_type& value) {
 			node<value_type>	*current, *parent, *x;
 
 			current = hint;
 			parent = nullptr;
 			while (current != NIL) {
-				if (value.first == current->data.first) return ft::make_pair(iterator(current),false);
+				if (_comp.equal(value, current->data)) return ft::make_pair(iterator(current),false);
 				parent = current;
 				current = _comp(value, current->data) ? current->left : current->right;
 			}
