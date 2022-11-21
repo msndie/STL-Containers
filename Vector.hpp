@@ -171,7 +171,7 @@ namespace ft {
 				if (p == &_array[_size]) {
 					construct_at_end(first, last);
 				} else {
-					move_part_of_array(p + dist, p, (&_array[_size] - p) * sizeof(value_type));
+					move_part_of_array(p, p + dist, (&_array[_size] - p) * sizeof(value_type));
 					pointer tmp = p;
 					for (; first != last; ++first, ++tmp, ++_size) {
 						_allocator.construct(tmp, *first);
@@ -315,7 +315,7 @@ namespace ft {
 				if (p == &_array[_size]) {
 					construct_at_end(count, value);
 				} else {
-					move_part_of_array(p + count, p, (&_array[_size] - p) * sizeof(value_type));
+					move_part_of_array(p, p + count, (&_array[_size] - p) * sizeof(value_type));
 					pointer tmp = p;
 					for (size_type i = 0; i < count; ++i, ++tmp) {
 						_allocator.construct(tmp, value);

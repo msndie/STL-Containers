@@ -214,11 +214,15 @@ namespace ft {
 		}
 
 		void erase(iterator first, iterator last) {
-			iterator tmp;
+			iterator next;
+			key_type tmp;
+			key_type l = last->first;
 
-			while (first != last) {
-				tmp = first++;
-				_tree->delete_node(tmp.base());
+			next = first;
+			while (next->first != l) {
+				tmp = first->first;
+				_tree->delete_node(next.base());
+				next = upper_bound(tmp);
 			}
 		}
 

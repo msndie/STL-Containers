@@ -59,8 +59,9 @@ namespace ft {
 
 		~iterator() {}
 
-		template< class U >
-		iterator& operator=( const iterator<U>& other ) { _value = other._value; return *this; }
+//		template< class U >
+//		iterator& operator=( const iterator<U>& other ) { _value = other._value; return *this; }
+		iterator& operator=( const iterator& other ) { _value = other._value; return *this; }
 		iterator& operator++() { ++_value; return *this; }
 		iterator& operator--() { --_value; return *this; }
 		iterator operator++(int) { iterator tmp(*this); ++_value; return tmp; }
@@ -80,14 +81,20 @@ namespace ft {
 	private:
 		Node _node;
 	public:
-		typedef Node															iterator_type;
-		typedef Pair			value_type;
-		typedef DiffType													difference_type;
-		typedef Pair&			reference;
-		typedef const Pair& 											const_reference;
-		typedef Pair*			pointer;
-		typedef const Pair* 												const_pointer;
-		typedef std::random_access_iterator_tag	iterator_category;
+//		typedef Node							iterator_type;
+		typedef Pair							iterator_type;
+		typedef typename iterator_traits<iterator_type>::value_type			value_type;
+		typedef typename iterator_traits<iterator_type>::difference_type	difference_type;
+		typedef typename iterator_traits<iterator_type>::reference			reference;
+		typedef typename iterator_traits<iterator_type>::pointer			pointer;
+		typedef typename iterator_traits<iterator_type>::iterator_category	iterator_category;
+//		typedef Pair							value_type;
+//		typedef DiffType						difference_type;
+//		typedef Pair&							reference;
+//		typedef const Pair&						const_reference;
+//		typedef Pair*							pointer;
+//		typedef const Pair*						const_pointer;
+//		typedef std::random_access_iterator_tag	iterator_category;
 
 		node_iterator() : _node() {}
 		explicit node_iterator(Node value) : _node(value) {}
@@ -97,16 +104,14 @@ namespace ft {
 				: _node(other.base()) {}
 		~node_iterator() {}
 
-		iterator_type base() const { return _node; }
+		Node base() const { return _node; }
 		node_iterator &operator=(const node_iterator &other) { _node = other._node; return *this; }
 		node_iterator operator++(int) { node_iterator tmp(*this); next(); return tmp; }
 		node_iterator &operator++() { next(); return *this; }
 		node_iterator operator--(int) { node_iterator tmp(*this); prev(); return tmp; }
 		node_iterator &operator--() { prev(); return *this; }
-		reference operator*() { return const_cast<Pair&>(_node->data); }
-		const_reference operator*() const { return _node->data; }
-		pointer operator->() { return &_node->data; }
-		const_pointer operator->() const { return &_node->data; }
+		reference operator*() const { return const_cast<reference>(_node->data); }
+		pointer operator->() const { return const_cast<pointer>(&_node->data); }
 		bool operator==(node_iterator const &obj) const { return _node == obj._node; }
 		bool operator!=(node_iterator const &obj) const { return _node != obj._node; }
 		bool operator>(node_iterator const &obj) const { return _node->data > obj._node->data; }
@@ -134,20 +139,34 @@ namespace ft {
 		}
 
 		void prev() {
-			if (_node->nil) _node = _node->parent;
-			else if (!_node->left->nil) {
+			if (_node->nil) return;
+			if (!_node->left->nil) {
 				_node = _node->left;
 				while (!_node->right->nil)
 					_node = _node->right;
 			} else {
-				Node tmp = _node;
-				_node = _node->parent;
-				while (_node->right != tmp) {
-					tmp = _node;
-					if (!_node->parent) { _node = tmp->left - 1; break; }
-					_node = _node->parent;
+				Node n = _node->parent;
+				while (n != NULL && _node == n->left) {
+					_node = n;
+					n = n->parent;
 				}
+				if (n) _node = n;
+				else _node = _node->nil_ptr;
 			}
+//			if (_node->nil) _node = _node->parent;
+//			else if (!_node->left->nil) {
+//				_node = _node->left;
+//				while (!_node->right->nil)
+//					_node = _node->right;
+//			} else {
+//				Node tmp = _node;
+//				_node = _node->parent;
+//				while (_node->right != tmp) {
+//					tmp = _node;
+//					if (!_node->parent) { _node = tmp->left - 1; break; }
+//					_node = _node->parent;
+//				}
+//			}
 		}
 	};
 
@@ -175,9 +194,9 @@ namespace ft {
 
 		iterator_type base() const { return _value; }
 
-		reference operator*() { return *_value; }
+		reference operator*() const { return *_value; }
 
-		pointer operator->() { return &operator*(); }
+		pointer operator->() const { return &operator*(); }
 
 		reverse_iterator& operator++() { --_value; return *this; }
 

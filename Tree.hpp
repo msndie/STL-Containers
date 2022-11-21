@@ -16,14 +16,15 @@ namespace ft {
 	struct node {
 		COLOR			color;
 		bool			nil;
+		struct node*	nil_ptr;
 		struct node*	begin;
 		struct node*	parent;
 		struct node*	left;
 		struct node*	right;
 		T				data;
 
-		node() : color(BLACK), nil(true), begin(this), parent(nullptr), left(this), right(this), data() {}
-		node(const T& data) : color(BLACK), nil(false), begin(this), parent(nullptr), left(this), right(this), data(data) {}
+		node() : color(BLACK), nil(true), nil_ptr(this), begin(this), parent(nullptr), left(this), right(this), data() {}
+		node(const T& data, node* nil_ptr) : color(BLACK), nil(false), nil_ptr(nil_ptr), begin(this), parent(nullptr), left(this), right(this), data(data) {}
 		~node() {}
 	};
 
@@ -36,8 +37,8 @@ namespace ft {
 		typedef const node_pointer												const_node_pointer;
 		typedef Alloc															allocator_type;
 		typedef typename allocator_type::difference_type						difference_type;
-		typedef typename ft::node_iterator<node<T>*, T, difference_type>		iterator;
-		typedef typename ft::node_iterator<const node<T>*, T, difference_type>	const_iterator;
+		typedef typename ft::node_iterator<node<T>*, T*, difference_type>		iterator;
+		typedef typename ft::node_iterator<const node<T>*, T*, difference_type>	const_iterator;
 		typedef typename ft::reverse_iterator<iterator>							reverse_iterator;
 		typedef typename ft::reverse_iterator<const_iterator>					const_reverse_iterator;
 		typedef std::size_t														size_type;
@@ -124,8 +125,8 @@ namespace ft {
 				parent = current;
 				current = _comp(value, current->data) ? current->left : current->right;
 			}
-			x = _alloc.allocate(sizeof(*x));
-			_alloc.construct(x, node<value_type>(value));
+			x = _alloc.allocate(sizeof(node_type));
+			_alloc.construct(x, node<value_type>(value, NIL));
 			x->color = RED;
 			x->right = NIL;
 			x->left = NIL;
@@ -212,7 +213,7 @@ namespace ft {
 			child_r = n->right;
 			parent = n->parent;
 			_alloc.destroy(n);
-			_alloc.construct(n, node<value_type>(v));
+			_alloc.construct(n, node<value_type>(v, NIL));
 			n->left = child_l;
 			n->right = child_r;
 			n->parent = parent;
