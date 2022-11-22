@@ -1,184 +1,171 @@
 #include <iostream>
 #include <vector>
 #include "Vector.hpp"
-#include "Stack.hpp"
 #include "Map.hpp"
 #include "Set.hpp"
-#include <stack>
 #include <map>
 #include <set>
-#include <string>
-#include <list>
+#include <sys/time.h>
 
-class B {
-public:
-	char *l;
-	int i;
-	B():l(nullptr), i(1) {
-		std::cout << "constructor B" << std::endl;
-	};
-	B(const int &ex) {
-		this->i = ex;
-		this->l = new char('a');
-		std::cout << "constructor B" << std::endl;
-	};
-	virtual ~B() {
-		std::cout << "destructor B" << std::endl;
-		delete this->l;
-		this->l = nullptr;
-	};
-};
-
-class A : public B {
-public:
-	A():B(){
-		std::cout << "constructor A" << std::endl;
-	};
-	A(const B* ex){
-		std::cout << "constructor A" << std::endl;
-		this->l = new char(*(ex->l));
-		this->i = ex->i;
-		if (ex->i == -1) throw "n";
-	}
-	~A() {
-		std::cout << "destructor B" << std::endl;
-		delete this->l;
-		this->l = nullptr;
-	};
-};
-
-class Test {
-public:
-	int x;
-	Test() : x() {}
-	explicit Test(int x) : x(x) {std::cout << "constructor" << std::endl;}
-	~Test() {
-		std::cout << "destructor" << std::endl;
-	}
-};
-
-template <typename T>
-class foo {
-public:
-	typedef T	value_type;
-
-	foo(void) : value(), _verbose(false) { };
-	foo(value_type src, const bool verbose = false) : value(src), _verbose(verbose) { };
-	foo(foo const &src, const bool verbose = false) : value(src.value), _verbose(verbose) { };
-	~foo(void) { if (this->_verbose) std::cout << "~foo::foo()" << std::endl; };
-	void m(void) { std::cout << "foo::m called [" << this->value << "]" << std::endl; };
-	void m(void) const { std::cout << "foo::m const called [" << this->value << "]" << std::endl; };
-	foo &operator=(value_type src) { this->value = src; return *this; };
-	foo &operator=(foo const &src) {
-		if (this->_verbose || src._verbose)
-			std::cout << "foo::operator=(foo) CALLED" << std::endl;
-		this->value = src.value;
-		return *this;
-	};
-	value_type	getValue(void) const { return this->value; };
-	void		switchVerbose(void) { this->_verbose = !(this->_verbose); };
-
-	operator value_type(void) const {
-		return value_type(this->value);
-	}
-private:
-	value_type	value;
-	bool		_verbose;
-};
-
-template <typename T>
-std::ostream	&operator<<(std::ostream &o, foo<T> const &bar) {
-	o << bar.getValue();
-	return o;
-}
-// --- End of class foo
-
-template <typename T>
-T	inc(T it, int n)
-{
-	while (n-- > 0)
-		++it;
-	return (it);
-}
-
-template <typename T>
-T	dec(T it, int n)
-{
-	while (n-- > 0)
-		--it;
-	return (it);
-}
-
-#define _ratio 1
-#define _map ft::map
-#define _set ft::set
 #define TESTED_TYPE int
-#define TESTED_NAMESPACE ft
-#define _pair TESTED_NAMESPACE::pair
-#define T1 char
-#define T2 int
-typedef _pair<const T1, T2> T3;
-typedef TESTED_NAMESPACE::map<T1, T2>::iterator ft_iterator;
-typedef TESTED_NAMESPACE::map<T1, T2>::const_iterator ft_const_iterator;
-static int iter = 0;
+#define ratio 10000
 
-template <typename T>
-std::string	printPair(const T &iterator, bool nl = true)
-{
-	std::cout << "key: " << iterator->first << " | value: " << iterator->second;
-	if (nl)
-		std::cout << std::endl;
-	return ("");
+time_t timer() {
+	struct timeval start = {};
+	gettimeofday(&start, nullptr);
+	time_t msecs_time = (start.tv_sec * 1000) + (start.tv_usec / 1000);
+	return msecs_time;
 }
 
-template <typename T_MAP>
-void	printSize(T_MAP const &mp, bool print_content = 1)
-{
-	std::cout << "size: " << mp.size() << std::endl;
-	std::cout << "max_size: " << mp.max_size() << std::endl;
-	if (print_content)
-	{
-		typename T_MAP::const_iterator it = mp.begin(), ite = mp.end();
-		std::cout << std::endl << "Content is:" << std::endl;
-		for (; it != ite; ++it)
-			std::cout << "- " << printPair(it, false) << std::endl;
-	}
-	std::cout << "###############################################" << std::endl;
+std::vector<TESTED_TYPE> vector_erase_test_ft() {
+	time_t t1;
+	time_t t2;
+	std::vector<int> v;
+
+	t1 = timer();
+	ft::vector<int> vector;
+	for (int i = 0; i < 9900 * ratio; ++i)
+		vector.push_back(i);
+	v.push_back(*(vector.erase(vector.begin() + 8 * ratio, vector.end() - 1500 * ratio)));
+	v.push_back(*(vector.begin() + 82 * ratio));
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	t2 = timer();
+
+	std::cout << "vector \x1B[33merase\033[0m test \x1B[32mft\033[0m " << (t2 - t1) << std::endl;
+	return v;
 }
 
-int		main(void)
-{
-	std::list<T3> lst;
-	unsigned int lst_size = 5;
-	for (unsigned int i = 0; i < lst_size; ++i)
-		lst.push_back(T3('a' + i, (i + 1) * 7));
+std::vector<TESTED_TYPE> vector_erase_test_std() {
+	time_t t1;
+	time_t t2;
+	std::vector<int> v;
 
-	TESTED_NAMESPACE::map<T1, T2> mp(lst.begin(), lst.end());
-	TESTED_NAMESPACE::map<T1, T2>::iterator it_ = mp.begin();
-	TESTED_NAMESPACE::map<T1, T2>::reverse_iterator it(it_), ite;
-	printSize(mp);
+	t1 = timer();
+	std::vector<int> vector;
+	for (int i = 0; i < 9900 * ratio; ++i)
+		vector.push_back(i);
+	v.push_back(*(vector.erase(vector.begin() + 8 * ratio, vector.end() - 1500 * ratio)));
+	v.push_back(*(vector.begin() + 82 * ratio));
+	v.push_back(vector.size());
+	v.push_back(vector.capacity());
+	t2 = timer();
 
-	std::cout << (it_ == it.base()) << std::endl;
-	std::cout << (it_ == dec(it, 3).base()) << std::endl;
+	std::cout << "vector \x1B[33merase\033[0m test \x1B[34mstd\033[0m " << (t2 - t1) << std::endl;
+	return v;
+}
 
-	printPair(it.base());
-	printPair(inc(it.base(), 1));
+std::vector<TESTED_TYPE> vector_assign_test_ft() {
+	time_t t1;
+	time_t t2;
+	std::vector<int> v;
+	ft::vector<int> tmp, tmp1, tmp2;
 
-	std::cout << "TEST OFFSET" << std::endl;
-	--it;
-	printPair(it);
-	printPair(it.base());
+	t1 = timer();
+	tmp1.assign(3, 3);
+	tmp.assign(4000 * ratio, 1);
+	tmp2.assign(4 * ratio, 1);
+	tmp1.assign(tmp.begin(), tmp.end());
+	v.push_back(tmp1[1]);
+	v.push_back(tmp1.size());
+	v.push_back(tmp1.capacity());
+	tmp1.assign(tmp2.begin(), tmp2.end());
+	v.push_back(tmp1[444]);
+	v.push_back(tmp1.size());
+	v.push_back(tmp1.capacity());
+	t2 = timer();
 
-	it = mp.rbegin(); ite = mp.rend();
-	int n = 0;
-	while (it != ite)
+	std::cout << "vector \x1B[33massign\033[0m test \x1B[32mft\033[0m " << (t2 - t1) << std::endl;
+	return v;
+}
+
+std::vector<TESTED_TYPE> vector_assign_test_std() {
+	time_t t1;
+	time_t t2;
+	std::vector<int> v;
+	std::vector<int> tmp, tmp1, tmp2;
+
+	t1 = timer();
+	tmp1.assign(3, 3);
+	tmp.assign(4000 * ratio, 1);
+	tmp2.assign(4 * ratio, 1);
+	tmp1.assign(tmp.begin(), tmp.end());
+	v.push_back(tmp1[1]);
+	v.push_back(tmp1.size());
+	v.push_back(tmp1.capacity());
+	tmp1.assign(tmp2.begin(), tmp2.end());
+	v.push_back(tmp1[444]);
+	v.push_back(tmp1.size());
+	v.push_back(tmp1.capacity());
+	t2 = timer();
+
+	std::cout << "vector \x1B[33massign\033[0m test \x1B[34mstd\033[0m " << (t2 - t1) << std::endl;
+	return v;
+}
+
+std::vector<TESTED_TYPE> vector_constructor_test_ft() {
+	time_t t1;
+	time_t t2;
+	std::vector<int> v;
+
+	t1 = timer();
+	ft::vector<int> tmp(1000 * ratio, 4), tmp2(1000 * ratio, 5);
+	ft::vector<int> tmp0(tmp);
+	tmp = tmp2;
+	ft::vector<int> tmp4(tmp.begin(), tmp.end());
+	v.push_back(tmp4.size());
+	v.push_back(tmp4.capacity());
+	v.push_back(tmp[2]);
+	v.push_back(tmp4[2]);
+	try { ft::vector<int> tmp5(-1, -1); }
+	catch (std::exception &e) { v.push_back(1); }
+	t2 = timer();
+
+	std::cout << "vector \x1B[33mconstructor\033[0m test \x1B[32mft\033[0m " << (t2 - t1) << std::endl;
+	return v;
+}
+
+std::vector<TESTED_TYPE> vector_constructor_test_std() {
+	time_t t1;
+	time_t t2;
+	std::vector<int> v;
+
+	t1 = timer();
+	std::vector<int> tmp(1000 * ratio, 4), tmp2(1000 * ratio, 5);
+	std::vector<int> tmp0(tmp);
+	tmp = tmp2;
+	std::vector<int> tmp4(tmp.begin(), tmp.end());
+	v.push_back(tmp4.size());
+	v.push_back(tmp4.capacity());
+	v.push_back(tmp[2]);
+	v.push_back(tmp4[2]);
+	try { std::vector<int> tmp5(-1, -1); }
+	catch (std::exception &e) { v.push_back(1); }
+	t2 = timer();
+
+	std::cout << "vector \x1B[33mconstructor\033[0m test \x1B[34mstd\033[0m " << (t2 - t1) << std::endl;
+	return v;
+}
+
+int		main(void) {
 	{
-		++n;
-		if (n == 5) {
-			std::cout << "kek" << std::endl;
-		}
-		std::cout << "[rev] " << printPair(it++, false) << std::endl;
+		std::vector<int> std = vector_constructor_test_std();
+		std::vector<int> ft = vector_constructor_test_ft();
+		if (ft != std)
+			std::cout << "\x1B[31mconstructor test failed\033[0m" << std::endl;
 	}
 
-	return (0);
+	{
+		std::vector<int> std = vector_assign_test_std();
+		std::vector<int> ft = vector_assign_test_ft();
+		if (ft != std)
+			std::cout << "\x1B[31massign test failed\033[0m" << std::endl;
+	}
+
+	{
+		std::vector<int> std = vector_erase_test_std();
+		std::vector<int> ft = vector_erase_test_ft();
+		if (ft != std)
+			std::cout << "\x1B[31merase test failed\033[0m" << std::endl;
+	}
 }

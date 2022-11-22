@@ -85,12 +85,9 @@ namespace ft {
 		T2	second;
 
 		pair() : first(), second() {}
-
 		pair(const T1& x, const T2& y) : first(x), second(y) {}
-
 		template< class U1, class U2 >
 		pair( const pair<U1, U2>& p ) : first(p.first), second(p.second) {}
-
 		pair& operator=( const pair& other ) {
 			first = other.first;
 			second = other.second;

@@ -29,16 +29,13 @@ namespace ft {
 		allocator_type	_allocator;
 
 	public:
-
 		explicit vector(const A& alloc = A()) : _array(nullptr), _size(0), _capacity(0), _allocator(alloc) {}
-
 		explicit vector(size_type count, const_reference value = T(), const A& alloc = A()) : _array(nullptr), _size(count), _capacity(count), _allocator(alloc) {
 			_array = _allocator.allocate(count);
 			for (size_type i = 0; i < _size; ++i) {
 				_array[i] = value;
 			}
 		}
-
 		vector(const vector& other) {
 			_capacity = other._capacity;
 			_size = other._size;
@@ -46,18 +43,11 @@ namespace ft {
 			_array = _allocator.allocate(_capacity);
 			std::memcpy(_array, other._array, sizeof(T) * _size);
 		}
-
 		template<class InputIt>
 		vector(InputIt first, InputIt last, const A& alloc = A(),
 			   typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = nullptr)
-			   : _array(nullptr), _size(0), _capacity(0), _allocator(alloc) {
-			assign(first, last);
-		}
-
-		~vector() {
-			clear();
-			_allocator.deallocate(_array, _capacity);
-		}
+			   : _array(nullptr), _size(0), _capacity(0), _allocator(alloc) { assign(first, last); }
+		~vector() { clear(); _allocator.deallocate(_array, _capacity); }
 
 		vector& operator=(const vector& other) {
 			if (&other != this) {
@@ -93,8 +83,8 @@ namespace ft {
 		const_iterator end() const { return const_iterator(&_array[_size]); }
 		reverse_iterator rbegin() { return reverse_iterator(--end()); }
 		const_reverse_iterator rbegin() const { return const_reverse_iterator(--end()); }
-		reverse_iterator rend() { return reverse_iterator(begin()); }
-		const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+		reverse_iterator rend() { return reverse_iterator(--begin()); }
+		const_reverse_iterator rend() const { return const_reverse_iterator(--begin()); }
 		size_type max_size() const {
 			return std::min(static_cast<size_type>(std::numeric_limits<typename A::difference_type>::max()),
 							_allocator.max_size());
@@ -226,10 +216,7 @@ namespace ft {
 			return iterator(p);
 		}
 
-		void clear() {
-			destruct_all(_array, _size);
-			_size = 0;
-		}
+		void clear() { destruct_all(_array, _size); _size = 0; }
 
 		void reserve(size_type new_cap) {
 			if (new_cap > _capacity) {

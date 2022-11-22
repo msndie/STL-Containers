@@ -22,7 +22,7 @@ namespace ft {
 			class Allocator = std::allocator<Key>
 	> class set {
 	public:
-		typedef Key					key_type;
+		typedef const Key					key_type;
 		typedef key_type			value_type;
 		typedef Compare				key_compare;
 		typedef key_compare			value_compare;
@@ -57,14 +57,14 @@ namespace ft {
 			_tree_alloc.construct(_tree, _base(_vc(_comp), typename _base::allocator_type(_alloc)));
 		}
 		explicit set(const Compare& comp, const Allocator& alloc = Allocator())
-					: _comp(comp), _alloc(alloc) {
+					: _alloc(alloc), _comp(comp) {
 			_tree_alloc = _tree_allocator(_alloc);
 			_tree = _tree_alloc.allocate(sizeof(_base));
 			_tree_alloc.construct(_tree, _base(_vc(_comp), typename _base::allocator_type(_alloc)));
 		}
 		template< class InputIt >
 		set(InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator())
-			: _comp(comp), _alloc(alloc) {
+			: _alloc(alloc), _comp(comp) {
 			_tree_alloc = _tree_allocator(_alloc);
 			_tree = _tree_alloc.allocate(sizeof(_base));
 			_tree_alloc.construct(_tree, _base(_vc(_comp), typename _base::allocator_type(_alloc)));
@@ -149,11 +149,15 @@ namespace ft {
 		}
 
 		void erase(iterator first, iterator last) {
-			iterator tmp;
+			iterator next;
+			Key tmp;
+			Key l = *last;
 
-			while (first != last) {
-				tmp = first++;
-				_tree->delete_node(const_cast< node<value_type>* >(tmp.base()));
+			next = first;
+			while (*next != l) {
+				tmp = *first;
+				_tree->delete_node(const_cast< node<value_type>* >(next.base()));
+				next = upper_bound(tmp);
 			}
 		}
 
@@ -183,10 +187,32 @@ namespace ft {
 		}
 
 		ft::pair<const_iterator,const_iterator> equal_range(const Key& key) const {
-			return equal_range(key);
+			return ft::pair<const_iterator, const_iterator>(lower_bound(key), upper_bound(key));
 		}
 
-		const_iterator lower_bound(const Key& key) const { return lower_bound(key); }
+		const_iterator lower_bound(const Key& key) const {
+			node<value_type> *current = _tree->_root;
+
+			while (!current->nil) {
+				if (key == current->data)
+					return const_iterator(current);
+				else {
+					if (_comp(key, current->data)) {
+						if (!current->left->nil)
+							current = current->left;
+						else
+							return const_iterator(current);
+					}
+					else {
+						if (!current->right->nil)
+							current = current->right;
+						else
+							return ++const_iterator(current);
+					}
+				}
+			}
+			return end();
+		}
 		iterator lower_bound(const Key& key) {
 			node<value_type> *current = _tree->_root;
 
@@ -211,7 +237,11 @@ namespace ft {
 			return end();
 		}
 
-		const_iterator upper_bound(const Key& key) const { return upper_bound(key); }
+		const_iterator upper_bound(const Key& key) const {
+			const_iterator tmp = lower_bound(key);
+
+			return (tmp == end()) ? tmp : (_comp(key, *tmp)) ? tmp : ++tmp;
+		}
 		iterator upper_bound(const Key& key) {
 			iterator tmp = lower_bound(key);
 

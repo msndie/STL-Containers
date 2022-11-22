@@ -50,17 +50,12 @@ namespace ft {
 		typedef typename iterator_traits<iterator_type>::iterator_category	iterator_category;
 
 		iterator() : _value() {}
-
 		iterator(iterator_type value) : _value(value) {}
-
 		template< class U >
 		iterator(const iterator<U>& other)
 				 : _value(other.base()) {}
-
 		~iterator() {}
 
-//		template< class U >
-//		iterator& operator=( const iterator<U>& other ) { _value = other._value; return *this; }
 		iterator& operator=( const iterator& other ) { _value = other._value; return *this; }
 		iterator& operator++() { ++_value; return *this; }
 		iterator& operator--() { --_value; return *this; }
@@ -81,20 +76,12 @@ namespace ft {
 	private:
 		Node _node;
 	public:
-//		typedef Node							iterator_type;
-		typedef Pair							iterator_type;
+		typedef Pair														iterator_type;
 		typedef typename iterator_traits<iterator_type>::value_type			value_type;
 		typedef typename iterator_traits<iterator_type>::difference_type	difference_type;
 		typedef typename iterator_traits<iterator_type>::reference			reference;
 		typedef typename iterator_traits<iterator_type>::pointer			pointer;
 		typedef typename iterator_traits<iterator_type>::iterator_category	iterator_category;
-//		typedef Pair							value_type;
-//		typedef DiffType						difference_type;
-//		typedef Pair&							reference;
-//		typedef const Pair&						const_reference;
-//		typedef Pair*							pointer;
-//		typedef const Pair*						const_pointer;
-//		typedef std::random_access_iterator_tag	iterator_category;
 
 		node_iterator() : _node() {}
 		explicit node_iterator(Node value) : _node(value) {}
@@ -139,34 +126,24 @@ namespace ft {
 		}
 
 		void prev() {
-			if (_node->nil) return;
+			if (_node == _node->nil_ptr->begin) {
+				_node = _node->nil_ptr;
+				return;
+			}
 			if (!_node->left->nil) {
 				_node = _node->left;
 				while (!_node->right->nil)
 					_node = _node->right;
 			} else {
-				Node n = _node->parent;
-				while (n != NULL && _node == n->left) {
-					_node = n;
-					n = n->parent;
+				Node tmp = _node;
+				_node = _node->parent;
+				if (!_node) { _node = tmp->left; return; }
+				while (_node->right != tmp) {
+					tmp = _node;
+					if (!_node->parent) { _node = tmp->left; break; }
+					_node = _node->parent;
 				}
-				if (n) _node = n;
-				else _node = _node->nil_ptr;
 			}
-//			if (_node->nil) _node = _node->parent;
-//			else if (!_node->left->nil) {
-//				_node = _node->left;
-//				while (!_node->right->nil)
-//					_node = _node->right;
-//			} else {
-//				Node tmp = _node;
-//				_node = _node->parent;
-//				while (_node->right != tmp) {
-//					tmp = _node;
-//					if (!_node->parent) { _node = tmp->left - 1; break; }
-//					_node = _node->parent;
-//				}
-//			}
 		}
 	};
 
@@ -183,37 +160,24 @@ namespace ft {
 		typedef typename iterator_traits<iterator_type>::iterator_category	iterator_category;
 
 		reverse_iterator() : _value() {}
-
 		reverse_iterator(iterator_type x) : _value(x) {}
-
 		template<class U>
 		reverse_iterator(const reverse_iterator<U>& u) : _value(u.base()) {}
+		~reverse_iterator() {}
 
 		template<class U>
 		reverse_iterator& operator=(const reverse_iterator<U>& u) { _value = u.base(); return  *this; }
-
 		iterator_type base() const { return _value; }
-
 		reference operator*() const { return *_value; }
-
 		pointer operator->() const { return &operator*(); }
-
 		reverse_iterator& operator++() { --_value; return *this; }
-
 		reverse_iterator operator++(int) { reverse_iterator tmp(*this); --_value; return tmp; }
-
 		reverse_iterator& operator--() { ++_value; return *this; }
-
 		reverse_iterator operator--(int) { reverse_iterator tmp(*this); ++_value; return tmp; }
-
 		reverse_iterator operator+(difference_type n) const { return reverse_iterator(_value - n); }
-
 		reverse_iterator& operator+=(difference_type n) { _value -= n; return *this; }
-
 		reverse_iterator operator-(difference_type n) const { return reverse_iterator(_value + n); }
-
 		reverse_iterator& operator-=(difference_type n) { _value += n; return *this; }
-
 		reference operator[](difference_type n) const { return *(*this + n); }
 	};
 

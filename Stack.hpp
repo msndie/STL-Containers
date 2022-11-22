@@ -19,31 +19,22 @@ namespace ft {
 
 	public:
 		explicit stack(const Container& container = Container()) : c(container) {}
-
 		stack(const stack& other) : c(other.c) {}
-
 		~stack() {}
-
 		stack& operator=(const stack& other) {
 			c = other.c;
 			return *this;
 		}
 
 		bool empty() const { return c.empty(); }
-
 		size_type size() const { return c.size(); }
-
 		reference top() { return c.back(); }
-
 		const_reference top() const { return c.back(); }
-
 		void push(const value_type& v) { c.push_back(v); }
-
 		void pop() { c.pop_back(); }
 
 		template<class T1, class C>
 		friend bool operator==(const stack<T1, C>& x, const stack<T1, C>& y);
-
 		template<class T1, class C>
 		friend bool operator<(const stack<T1, C>& x, const stack<T1, C>& y);
 	};

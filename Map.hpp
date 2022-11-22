@@ -60,7 +60,7 @@ namespace ft {
 		_tree_allocator			_tree_alloc;
 
 	public:
-		typedef typename _base::iterator					iterator;
+		typedef typename _base::iterator				iterator;
 		typedef typename _base::const_iterator			const_iterator;
 		typedef typename _base::reverse_iterator 		reverse_iterator;
 		typedef typename _base::const_reverse_iterator	const_reverse_iterator;
